@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By # allow search with parameters
 from selenium.webdriver.support.ui import WebDriverWait # allow waiting for page to load
 from selenium.webdriver.support import expected_conditions as EC # determine whether the web page has loaded
 from selenium.common.exceptions import TimeoutException # handling timeout situation 
+import pandas as pd
 
 # initialization outdated for newer versions of selenium
 # driver_option = webdriver.ChromeOptions()
@@ -30,3 +31,38 @@ for proj in projects:
 # Close connection
 browser.quit()
 
+# Extracting data
+project_df = pd.DataFrame.from_dict(project_list, orient = 'index')
+
+# Manipulate the table
+project_df['project_name'] = project_df.index
+project_df.columns = ['project_url', 'project_name']
+project_df = project_df.reset_index(drop=True)
+
+# inspect the generated dataframe
+# print(project_df)
+
+# Export project dataframe to CSV
+project_df.to_csv('project_list.csv')
+
+
+# example parallelization code
+# from concurrent.futures import ProcessPoolExecutor
+# import concurrent.futures
+# def scrape_url(url):
+#  new_browser = create_webdriver()
+#  new_browser.get(url)
+ 
+#  # Extract required data here
+#  # ...
+ 
+#  new_browser.quit()
+ 
+#  return data
+
+# with ProcessPoolExecutor(max_workers=4) as executor:
+#  future_results = {executor.submit(scrape_url, url) for url in urlarray}
+
+# results = []
+#  for future in concurrent.futures.as_completed(future_results):
+#   results.append(future.result())
