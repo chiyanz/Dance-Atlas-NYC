@@ -25,10 +25,14 @@ for studio_name, url in urls.items():
   if studio_name == 'Peri':
     driver.implicitly_wait(3) # implicait waiting to allow site content to load
     dates = driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
-    print(len(dates))
-    if dates:
-      dates[1].click()
-    # wait = WebDriverWait(driver, timeout=5)
-    # wait.until(lambda d : classes.is_displayed())
-    print(dates)
-  
+    # workaround for StaleElementReferenceException: relocate all dates and use a counter instead of iterate through them
+    available_dates = len(dates)
+    for i in range(1, available_dates):
+        dates = driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
+        dates[i].click()
+        driver.implicitly_wait(5) 
+        # relocate all date buttons after page refresh
+        classes = driver.find_elements(By.XPATH, "//div[@class='bw-session']")
+        for session in classes:
+          print('This is a separate class: ' + session.text + "\n")
+
