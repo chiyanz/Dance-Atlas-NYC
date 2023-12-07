@@ -21,10 +21,14 @@ urls = config['urls']
 
 for studio_name, url in urls.items():
   print(studio_name, url)
-  driver.implicitly_wait(5)
   driver.get(url)
-  classes = driver.find_elements(By.XPATH, '//*[@class="bw_session"]')
-  # wait = WebDriverWait(driver, timeout=5)
-  # wait.until(lambda d : classes.is_displayed())
-  print(classes)
+  if studio_name == 'Peri':
+    driver.implicitly_wait(3) # implicait waiting to allow site content to load
+    dates = driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
+    print(len(dates))
+    if dates:
+      dates[1].click()
+    # wait = WebDriverWait(driver, timeout=5)
+    # wait.until(lambda d : classes.is_displayed())
+    print(dates)
   
