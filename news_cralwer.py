@@ -43,8 +43,11 @@ bs_instance = BeautifulSoup(html, "html.parser")
 # print(bs_instance.text)
 # main_content = bs_instance.find('div', {'class': 'mg-blog-post-box'})
 # images = main_content.findAll('img')
-top_image = bs_instance.select_one('img.img-fluid.wp-post-image')
+top_image = bs_instance.find('img', {'class': 'wp-post-image'})
+articles = bs_instance.findAll('article')
+primary_article = articles[0] if articles else None
+paragraphs = primary_article.findAll('p') if primary_article else []
+formatted_articles = "\n".join([pg.get_text() for pg in paragraphs if not pg.get_text().isupper()])
 
-
-print('found image: ', top_image)
-# , {'class': 'img-fluid wp-post-image'}
+# print('found image: ', top_image)
+print(formatted_articles)
