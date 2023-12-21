@@ -9,7 +9,6 @@ import pandas as pd
 import json
 
 
-
 class StudioCrawler: 
     """
     for crawling individual dance studio websites in NYC
