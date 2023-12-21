@@ -85,10 +85,10 @@ class StudioCrawler:
               print(len(classes))
               for session in classes:
                 print(session.text)
-                start_time = session.find_element(By.XPATH, "//time[@class='hc_starttime']").get_attribute('datetime')
-                end_time = session.find_element(By.XPATH, "//time[@class='hc_endtime']").get_attribute('datetime')
-                session_name = session.find_element(By.XPATH, "//div[@class='bw-session__name']").text
-                instructor = session.find_element(By.XPATH, "//div[@class='bw-session__staff']").text
+                start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
+                end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
+                session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
+                instructor = session.find_element(By.XPATH, ".//div[@class='bw-session__staff']").text
                 info = {
                   'start_time': start_time,
                   'end_time': end_time,
