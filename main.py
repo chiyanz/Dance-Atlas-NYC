@@ -29,31 +29,92 @@ class StudioCrawler:
       for studio_name, url in self.studios.items():
         print(studio_name, url)
         self.driver.get(url)
-        if studio_name == 'Peri':
-          self.driver.implicitly_wait(3) # implicait waiting to allow site content to load
+        # if studio_name == 'Peri':
+        #    self.peri_handler()
+        if studio_name == 'PMT':
+           self.peri_handler()
+        if studio_name == 'PMT':
+           self.pmt_handler()
+          
+    def peri_handler(self):
+      try:
+          # Wait up to 10 seconds for the page to be loaded
+          print('waiting for page to load')
+          WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+          print('waiting done')
+      except:
+          print("Page did not load in 10 seconds!")
+      self.driver.implicitly_wait(10)
+      dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
+      print(dates)
+      # workaround for StaleElementReferenceException: relocate all dates and use a counter instead of iterate through them
+      available_dates = len(dates)
+      for i in range(1, available_dates):
           dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
-          # workaround for StaleElementReferenceException: relocate all dates and use a counter instead of iterate through them
-          available_dates = len(dates)
-          for i in range(1, available_dates):
-              dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
-              dates[i].click()
-              try:
-                  # Wait up to 10 seconds for the page to be loaded
-                  WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'html')))
-                  WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
-              except:
-                  print("Page did not load in 10 seconds!")
-              
-              # try:
-              #   self.driver.find_elements(By.XPATH, "//div[@class='bw-session']")
-              # except:
-              #    print("Some error occured while finding classes")
-              classes = [session.text for session in self.driver.find_elements(By.XPATH, "//div[@class='bw-session']")]
-              for session in classes:
-                info = session.split('\n')
-                # trim off buttons
-                info = list(filter(lambda x: x != 'View details' and x != 'Register', info))
-                self.data[studio_name].append(info) #TODO: future storage in csv or database
+          dates[i].click()
+          try:
+              # Wait up to 10 seconds for the page to be loaded
+              WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+              WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
+          except:
+              print("Page did not load in 10 seconds!")
+          
+          # try:
+          #   self.driver.find_elements(By.XPATH, "//div[@class='bw-session']")
+          # except:
+          #    print("Some error occured while finding classes")
+          classes = [session.text for session in self.driver.find_elements(By.XPATH, "//div[@class='bw-session']")]
+          for session in classes:
+            info = session.split('\n')
+            # trim off buttons
+            info = list(filter(lambda x: x != 'View details' and x != 'Register', info))
+            self.data['Peri'].append(info) #TODO: future storage in csv or database
+
+    
+    def pmt_handler(self):
+      try:
+          # Wait up to 10 seconds for the page to be loaded
+          print('waiting for page to load')
+          WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+          WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.ID, 'site-root')))
+          print('waiting done')
+      except:
+          print("Page did not load in 10 seconds!")
+      dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
+      print(dates)
+      # workaround for StaleElementReferenceException: relocate all dates and use a counter instead of iterate through them
+      available_dates = len(dates)
+      for i in range(1, available_dates):
+          # relocate all the date buttons to prevent staleelement exception
+          dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
+          dates[i].click()
+          try:
+              # Wait up to 10 seconds for the page to be loaded
+              WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'html')))
+              WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
+          except:
+              print("Page did not load in 10 seconds!")
+          
+          # try:
+          #   self.driver.find_elements(By.XPATH, "//div[@class='bw-session']")
+          # except:
+          #    print("Some error occured while finding classes")
+          classes = [session.text for session in self.driver.find_elements(By.XPATH, "//div[@class='bw-session__info']")]
+          for session in classes:
+            print('1 class')
+            start_time = session.find_element(By.XPATH, "//time[@class='hc_starttime']").get_attribute('datetime')
+            end_time = session.find_element(By.XPATH, "//time[@class='hc_endtime']").get_attribute('datetime')
+            session_name = session.find_element(By.XPATH, "//div[@class='bw-session__name']").text
+            instructor = session.find_element(By.XPATH, "//div[@class='bw-session__staff']").text
+            info = {
+               'start_time': start_time,
+               'end_time': end_time,
+               'session_name': session_name,
+               'instructor': instructor
+            }
+            print(info)
+            self.data['PMT'].append(info) #TODO: future storage in csv or database
+
 
 if __name__ == "__main__":
   # read config file for 
