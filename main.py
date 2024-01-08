@@ -61,27 +61,31 @@ class StudioCrawler:
 
     def peri_handler(self):
       # self.driver.implicitly_wait(3)
-      try: 
         wait = WebDriverWait(self.driver, 10)
 
         dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
         # dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
         # workaround for StaleElementReferenceException: relocate all dates and use a counter instead of iterate through them
         available_dates = len(dates)
+      
         for i in range(available_dates):
             print(f"attempt to click day {i} button")
-            self.driver.implicitly_wait(5)
-            dates[i].click()
+            self.driver.implicitly_wait(10)
+            try:
+              dates[i].click()
+            except:
+              dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
+              dates[i].click()
             print(f"day {i} clicked")
             # reloate dates
-            dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
             #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
             #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
             # except:
             #     print("Page did not load in 10 seconds!")
-            try: 
-              classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
-              print(len(classes))
+
+            classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
+            print(len(classes))
+            try:
               for session in classes:
                 print(session.text)
                 start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
@@ -96,11 +100,9 @@ class StudioCrawler:
                 }
                 print(info)
                 self.data['Peri'].append(info) #TODO: future storage in csv or database
-            except:
-              print(f'no classes found on day {i}')
-
-      except Exception as e:
-        print(e)
+            except Exception as e:
+              # print(f'no classes found on day {i}')
+               print('encountered exception', e)
 
       
     
