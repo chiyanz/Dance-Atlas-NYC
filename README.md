@@ -13,7 +13,7 @@ This build uses chromedriver-win64 ver 120 compatible with Chrome 120.x versions
 1. Ensure Python3 and pip are installed
 2. Download all required dependencies by running ```pip install -r requirements.txt```
 3. Modify `site_data.json` to supplement information such as URLs and studio name
-4. Run `main.py` for a pandas Dataframe to be generated and compiled class info to be written to terminal
+4. Run `studio_crawler.py` for a pandas Dataframe to be generated and compiled class info to be written to terminal
 
 ### Contribution & Questions
 contact: jonathanqyz@gmail.com
