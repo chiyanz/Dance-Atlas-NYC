@@ -1,0 +1,26 @@
+name: Studio Crawler Workflow
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  crawl-studios:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Specify the Python version here
+      
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run studio_crawler.py
+      run: python studio_crawler.py
