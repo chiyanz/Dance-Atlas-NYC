@@ -1,3 +1,5 @@
+from firestore_util import Firebase
+
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -40,6 +42,7 @@ class StudioCrawler:
         # self.driver.execute_script(self.javascript_code)
         self.studios = studios
         self.data = {name: [] for name, _ in studios.items()}
+        self.db = Firebase().create_firebase_admin()
 
     def crawlSessions(self):
       for studio_name, url in self.studios.items():
@@ -65,7 +68,7 @@ class StudioCrawler:
     def peri_handler(self):
         dates = []
         try:
-          wait = WebDriverWait(self.driver, 10)
+          wait = WebDriverWait(self.driver, 5)
           dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
         except Exception as e:
           print(e)
