@@ -48,13 +48,25 @@ class StudioCrawler:
       for studio_name, url in self.studios.items():
         print(studio_name, url)
         self.driver.get(url)
-        self.driver.implicitly_wait(5)
         if studio_name == 'Peri':
            self.peri_handler()
         if studio_name == 'PMT':
            self.pmt_handler()
         if studio_name == 'Modega':
            self.modega_handler()
+    
+    def storeData(self):
+       for studio, classes in self.data.items():
+          studio_ref = self.db.collection('classes').document(studio)
+          print(f'storing for {studio}')
+          for c in classes:
+            try:
+              date = c['start_time'].split('T')[0]
+              # create composite key from datetime and session name
+              id = date + c['session_name']
+              studio_ref.collection(date).document(id).set(c) 
+            except:
+              print('error parsing stored data')
     
     def find(self, selector):
       # finds an element by its xpath selector
@@ -89,7 +101,6 @@ class StudioCrawler:
             try:
               classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
               for session in classes:
-                print(session.text)
                 start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
                 end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
                 session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
@@ -100,7 +111,6 @@ class StudioCrawler:
                   'session_name': session_name,
                   'instructor': instructor
                 }
-                print(info)
                 self.data['Peri'].append(info) #TODO: future storage in csv or database
             except Exception as e:
                print(f'no classes found on day {i}')
@@ -166,16 +176,9 @@ class StudioCrawler:
             dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
             dates[i].click()
           print(f"day {i} clicked")
-          # reloate dates
-          #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-          #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
-          # except:
-          #     print("Page did not load in 10 seconds!")
 
-          
           try:
             classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(concat(' ', normalize-space(@class), ' '), ' p-1 ') and contains(concat(' ', normalize-space(@class), ' '), ' card-body ')]")))
-            print(len(classes))
             for session in classes:
               start_time = session.find_element(By.XPATH, ".//p[contains(@class, 'dateTimeText') and contains(@class, 'card-text')]").text
               duration = re.match(r"\((\d+\smin)\)", start_time)
@@ -183,7 +186,6 @@ class StudioCrawler:
               misc_info = session.find_elements(By.XPATH, ".//p[contains(@class, 'card-text')]")
               instructor = misc_info[1].text
               location = misc_info[2].text
-              print(instructor)
               info = {
                 'start_time': start_time,
                 'duration': duration,
@@ -191,7 +193,6 @@ class StudioCrawler:
                 'instructor': instructor,
                 'location': location
               }
-              print(info)
               self.data['Modega'].append(info) #TODO: future storage in csv or database
           except Exception as e:
               print(f'no classes found on day {i}')
@@ -210,4 +211,5 @@ if __name__ == "__main__":
   with open('crawler_results.json', 'w', encoding='utf-8') as f:
     json.dump(studios, f, ensure_ascii=False, indent=4)
   print(crawler.data)
+  crawler.storeData()
 
