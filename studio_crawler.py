@@ -54,6 +54,7 @@ class StudioCrawler:
            self.pmt_handler()
         if studio_name == 'Modega':
            self.modega_handler()
+        print(self.data)
     
     def storeData(self):
        for studio, classes in self.data.items():
@@ -65,7 +66,8 @@ class StudioCrawler:
               # create composite key from datetime and session name
               id = date + c['session_name']
               studio_ref.collection(date).document(id).set(c) 
-            except:
+            except Exception as e:
+              print(e)
               print('error parsing stored data')
     
     def find(self, selector):
