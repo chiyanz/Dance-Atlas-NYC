@@ -64,9 +64,9 @@ class StudioCrawler:
           print(f'storing for {studio}')
           for c in classes:
             try:
-              date = c['start_time'].split('T')[0]
+              date = c['start_time'].strftime('%Y-%m-%d')
               # create composite key from datetime and session name
-              id = date + c['session_name']
+              id = date + re.sub(r'[^\w]', '_', c['session_name'])
               studio_ref.collection(date).document(id).set(c) 
             except Exception as e:
               print(e)
@@ -104,8 +104,12 @@ class StudioCrawler:
             try:
               classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
               for session in classes:
+                edt_timezone = ZoneInfo("America/New_York")
                 start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
+                start_time = datetime.fromisoformat(start_time).replace(tzinfo=edt_timezone)
                 end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
+                end_time = datetime.fromisoformat(end_time).replace(tzinfo=edt_timezone)
+
                 session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
                 instructor = session.find_element(By.XPATH, ".//div[@class='bw-session__staff']").text
                 info = {
@@ -219,15 +223,19 @@ class StudioCrawler:
 
 
 if __name__ == "__main__":
-  # read config file for 
+  # read config file
   f = open("site_data.json")
   config = json.load(f)
   studio_urls = config['urls']
+
+  # crawl chosen sites and store in firebase db
   crawler = StudioCrawler(studio_urls)
   crawler.crawlSessions()
-  studios = {studio: [] for studio, _ in studio_urls.items()}
-  with open('crawler_results.json', 'w', encoding='utf-8') as f:
-    json.dump(studios, f, ensure_ascii=False, indent=4)
-  print(crawler.data['Modega'])
-  # crawler.storeData()
+  crawler.storeData()
+
+  # store data locally for debugging
+  # studios = {studio: [] for studio, _ in studio_urls.items()}
+  # with open('crawler_results.json', 'w', encoding='utf-8') as f:
+  #   json.dump(crawler.data, f, ensure_ascii=False, indent=4)
+  # print(crawler.data)
 
