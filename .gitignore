@@ -1,0 +1,9 @@
+# virtual environment resources
+dev 
+
+# credentials
+credentials
+
+# cache
+__pycache__
+

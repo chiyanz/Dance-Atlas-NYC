@@ -1,5 +1,0 @@
-Studios that will be crawled:
-    "Peri": "https://www.peridance.com/openclasses.cfm",
-    "PMT": "https://www.pmthouseofdance.com/sign-up-for-classes"
-    "Modega": "https://sutrapro.com/modega"
-
