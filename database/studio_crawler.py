@@ -7,12 +7,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 # json parsing and csv data tools
-import pandas as pd
 import json
+import os
 import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo  # Import the ZoneInfo class
-
 
 class StudioCrawler: 
     """
@@ -33,9 +32,11 @@ class StudioCrawler:
     },
     });
     """
-    def __init__(self, studios: {str: str} = None) -> None:
+    def __init__(self, studios: {str: str} = None, mode: str = "dev") -> None:
         options = webdriver.ChromeOptions()
-        # options.add_argument("--headless") # for production: disable browser display 
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')  
+        options.add_argument('--disable-dev-shm-usage')        
         options.add_argument("--ignore-certificate-error")
         options.add_argument("--ignore-ssl-errors")
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
@@ -215,7 +216,7 @@ class StudioCrawler:
                 'instructor': instructor,
                 'location': location
               }
-              self.data['Modega'].append(info) #TODO: future storage in csv or database
+              self.data['Modega'].append(info)
           except Exception as e:
               print(f'no classes found on day {i}')
               print(e)
@@ -229,7 +230,7 @@ if __name__ == "__main__":
   studio_urls = config['urls']
 
   # crawl chosen sites and store in firebase db
-  crawler = StudioCrawler(studio_urls)
+  crawler = StudioCrawler(studio_urls, 'dev')
   crawler.crawlSessions()
   crawler.storeData()
 
