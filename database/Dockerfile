@@ -11,15 +11,15 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update && apt-get install -y google-chrome-stable \
-    && rm -rf /var/lib/apt/lists/*
+# Manually download and install a specific version of Google Chrome
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -fy  # Fixes missing dependencies
 
-# Install ChromeDriver
-RUN CHROME_DRIVER_VERSION=$(wget -qO- https://chromedriver.storage.googleapis.com/LATEST_RELEASE) \
-    && wget -q --continue -P /chromedriver "http://chromedriver.storage.googleapis.com/$CHROME_DRIVER_VERSION/chromedriver_linux64.zip" \
+# Remove the downloaded .deb file to clear space
+RUN rm google-chrome-stable_current_amd64.deb
+
+# Manually specify the ChromeDriver version known to be compatible with Chrome 100.0.4896.20
+RUN wget -q --continue -P /chromedriver "https://chromedriver.storage.googleapis.com/100.0.4896.60/chromedriver_linux64.zip" \
     && unzip /chromedriver/chromedriver* -d /usr/local/bin/ \
     && rm -rf /chromedriver
 
