@@ -1,9 +1,6 @@
+"use client";
 import { useEffect, useState } from "react";
-import { collection, getDocs, DocumentData } from "firebase/firestore";
-import { db } from "../../utils/firebaseClient";
-import { convertFirestoreDocToSessionData } from "../../utils/convert_data";
 import { SessionData } from "../../types/dataSchema";
-import { format } from "date-fns";
 
 const Home: React.FC = () => {
   const [data, setData] = useState<SessionData[]>([]);
@@ -13,18 +10,13 @@ const Home: React.FC = () => {
     async function fetchData() {
       try {
         setLoading(true);
-
-        const today = format(new Date(), "yyyy-MM-dd");
-        const path = `classes/Modega/${today}`;
-
-        const collectionRef = collection(db, path);
-
-        const querySnapshot = await getDocs(collectionRef);
-        const docs = querySnapshot.docs.map((doc) =>
-          convertFirestoreDocToSessionData(doc.data())
-        );
-
-        setData(docs);
+        const response = await fetch("/api/classes");
+        if (response.ok) {
+          const data: SessionData[] = await response.json();
+          setData(data);
+        } else {
+          console.error("Failed to fetch data from API");
+        }
       } catch (error) {
         console.error("Error fetching data: ", error);
       } finally {
