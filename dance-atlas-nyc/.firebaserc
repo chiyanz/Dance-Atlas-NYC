@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "danceatlasnyc",
+    "dance-website": "danceatlasnyc"
+  },
+  "targets": {},
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}
