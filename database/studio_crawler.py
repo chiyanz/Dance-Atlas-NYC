@@ -58,7 +58,8 @@ class StudioCrawler:
            self.pmt_handler()
         if studio_name == 'Modega':
            self.modega_handler()
-        print(self.data)
+        if studio_name == 'BDC':
+           self.bdc_handler()
     
     def storeData(self):
        for studio, classes in self.data.items():
@@ -151,10 +152,8 @@ class StudioCrawler:
             #     print("Page did not load in 10 seconds!")
 
             classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
-            print(len(classes))
             try:
               for session in classes:
-                print(session.text)
                 start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
                 end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
                 session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
@@ -165,8 +164,7 @@ class StudioCrawler:
                   'session_name': session_name,
                   'instructor': instructor
                 }
-                print(info)
-                self.data['Peri'].append(info) #TODO: future storage in csv or database
+                self.data['PMT'].append(info) #TODO: future storage in csv or database
             except Exception as e:
               # print(f'no classes found on day {i}')
                print('encountered exception', e)
@@ -222,7 +220,44 @@ class StudioCrawler:
               print(f'no classes found on day {i}')
               print(e)
       return
+    
+    def bdc_handler(self): 
+      wait = WebDriverWait(self.driver, 10)
+      dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+      edt_timezone = ZoneInfo("America/New_York")
 
+      available_dates = len(dates)
+      for i in range(available_dates): 
+        day = dates[i]
+        try:
+          sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
+          for session in sessions:
+            try:
+                session_starttime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_starttime')]").get_attribute('datetime')
+                session_endtime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_endtime')]").get_attribute('datetime')
+                session_starttime = datetime.fromisoformat(session_starttime).replace(tzinfo=edt_timezone)
+                session_endtime = datetime.fromisoformat(session_endtime).replace(tzinfo=edt_timezone)
+
+                session_name = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__name')]").text
+                session_level = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__level')]").text
+                session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
+                session_location = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__location')]").text
+
+                info = {
+                    "start_time": session_starttime,
+                    "end_time": session_endtime,
+                    "session_name": session_name,
+                    "level": session_level,
+                    "instructor": session_staff,
+                    "location": session_location
+                }
+                self.data['BDC'].append(info)
+            except Exception as e:
+                print(f"Error processing session: {e}")
+
+        except Exception as e:
+            print(f"Error processing day: {e}")
+      return 
 
 if __name__ == "__main__":
   # read config file
