@@ -2,11 +2,19 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/utils/*": ["utils/*"],
-      "@/types/*": ["types/*"]
+      "@/utils/*": [
+        "utils/*"
+      ],
+      "@/types/*": [
+        "types/*"
+      ]
     },
     "target": "es2020",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -21,8 +29,21 @@
     "isolatedModules": true,
     "module": "esnext",
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.json"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.json",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

@@ -4,7 +4,8 @@ import { Timestamp } from "firebase/firestore";
 export interface SessionData {
   end_time: Date; // Will store as Date after conversion
   instructor: string;
-  location: string;
+  level?: string;
+  location?: string;
   session_name: string;
   start_time: Date; // Will store as Date after conversion
 }

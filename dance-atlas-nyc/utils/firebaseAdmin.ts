@@ -1,21 +1,25 @@
-import admin from "firebase-admin";
-import { getApps } from "firebase-admin/app";
-import { getFirestore, Firestore } from "firebase-admin/firestore";
+import {
+  initializeApp,
+  applicationDefault,
+  cert,
+  getApps,
+} from "firebase-admin/app";
+import { credential } from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 import path from "path";
-import fs from "fs";
 
-const serviceAccountPath = path.resolve(
-  process.cwd(),
-  "../credentials/serviceAccountKey.json"
-);
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
+const serviceAccountPath =
+  process.env.SERVICE_ACCOUNT_KEY_PATH ||
+  path.resolve(
+    "C:\\Users\\jonat\\Projects\\Dance-Atlas-NYC\\dance-atlas-nyc\\app\\credentials\\serviceAccountKey.json"
+  );
 
 if (!getApps().length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+  initializeApp({
+    credential: cert(serviceAccountPath),
   });
 }
 
-const adminDb = getFirestore();
+const db = getFirestore();
 
-export { adminDb };
+export { db };
