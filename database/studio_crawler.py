@@ -10,6 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import json
 import os
 import re
+import argparse
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo  # Import the ZoneInfo class
 
@@ -32,7 +33,7 @@ class StudioCrawler:
     },
     });
     """
-    def __init__(self, studios: {str: str} = None, mode: str = "dev") -> None:
+    def __init__(self, studios = None, mode: str = "dev") -> None:
         options = webdriver.ChromeOptions()
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')  
@@ -47,6 +48,15 @@ class StudioCrawler:
         self.studios = studios
         self.data = {name: [] for name, _ in studios.items()}
         self.db = Firebase().create_firebase_admin()
+        self.mode = mode
+
+    def main(self):
+      self.crawlSessions()
+      if self.mode == 'prod':  
+        self.storeData()
+      else:
+        print(f'dev outputs:\n {self.data}')
+          
 
     def crawlSessions(self):
       for studio_name, url in self.studios.items():
@@ -260,6 +270,18 @@ class StudioCrawler:
       return 
 
 if __name__ == "__main__":
+  parser = argparse.ArgumentParser(description="A script to specify the environment as 'dev' or 'prod'")
+  parser.add_argument(
+        '--mode', 
+        choices=['dev', 'prod'], 
+        default='dev', 
+        help="Specify the environment ('dev' or 'prod'). Default is 'dev'."
+    )
+
+  args = parser.parse_args()
+  mode = args.mode
+  print(f"Mode: {mode}")
+
   # read config file
   f = open("site_data.json")
   config = json.load(f)
