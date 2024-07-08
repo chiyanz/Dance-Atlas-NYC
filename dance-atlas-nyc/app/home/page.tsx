@@ -54,78 +54,99 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-6 bg-black min-h-screen text-white">
       {loading ? (
         <div className="text-center">
           <p>Loading...</p>
         </div>
       ) : (
         <div>
-          <div className="mb-4">
-            <label className="mr-2">Studio: </label>
-            <select
-              onChange={(e) => setSelectedStudio(e.target.value)}
-              value={selectedStudio}
-              className="border border-gray-300 rounded p-2 text-black"
-            >
-              <option value="">All</option>
-              {Object.keys(data).map((studio) => (
-                <option key={studio} value={studio}>
-                  {studio}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="mb-4">
-            <label className="mr-2">Date: </label>
-            <select
-              onChange={(e) => setSelectedDate(e.target.value)}
-              value={selectedDate}
-              className="border border-gray-300 rounded p-2 text-black"
-            >
-              <option value="">All</option>
-              {Array.from(
-                new Set(
-                  Object.keys(data).flatMap((studio) =>
-                    Object.keys(data[studio])
+          <div className="mb-4 flex space-x-4">
+            <div>
+              <label className="mr-2">Studio: </label>
+              <select
+                onChange={(e) => setSelectedStudio(e.target.value)}
+                value={selectedStudio}
+                className="border border-gray-300 rounded p-2 text-black"
+              >
+                <option value="">All</option>
+                {Object.keys(data).map((studio) => (
+                  <option key={studio} value={studio}>
+                    {studio}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="mr-2">Date: </label>
+              <select
+                onChange={(e) => setSelectedDate(e.target.value)}
+                value={selectedDate}
+                className="border border-gray-300 rounded p-2 text-black"
+              >
+                <option value="">All</option>
+                {Array.from(
+                  new Set(
+                    Object.keys(data).flatMap((studio) =>
+                      Object.keys(data[studio])
+                    )
                   )
-                )
-              ).map((date) => (
-                <option key={date} value={date}>
-                  {date}
-                </option>
-              ))}
-            </select>
+                ).map((date) => (
+                  <option key={date} value={date}>
+                    {date}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           {Object.keys(filteredData).map((studio) => (
-            <div key={studio} className="mb-6">
-              <h2 className="text-xl font-bold mb-2">{studio}</h2>
+            <div key={studio} className="mb-8">
+              <h2 className="text-2xl font-bold mb-4">{studio}</h2>
               {Object.keys(filteredData[studio]).map((date) => (
-                <div key={date} className="mb-4">
-                  <h3 className="text-lg font-semibold mb-1">{date}</h3>
-                  <ul className="list-disc list-inside">
-                    {filteredData[studio][date].map((session, index) => (
-                      <li key={index} className="mb-2">
-                        <p>
-                          <strong>Session:</strong> {session.session_name}
-                        </p>
-                        <p>
-                          <strong>Instructor:</strong> {session.instructor}
-                        </p>
-                        <p>
-                          <strong>Location:</strong> {session.location}
-                        </p>
-                        <p>
-                          <strong>Start Time:</strong>{" "}
-                          {new Date(session.start_time).toLocaleString()}
-                        </p>
-                        <p>
-                          <strong>End Time:</strong>{" "}
-                          {new Date(session.end_time).toLocaleString()}
-                        </p>
-                      </li>
-                    ))}
-                  </ul>
+                <div key={date} className="mb-6">
+                  <h3 className="text-xl font-semibold mb-2">{date}</h3>
+                  <table className="min-w-full bg-white border border-gray-200 rounded">
+                    <thead>
+                      <tr>
+                        <th className="py-2 px-4 border-b text-black">
+                          Session
+                        </th>
+                        <th className="py-2 px-4 border-b text-black">
+                          Instructor
+                        </th>
+                        <th className="py-2 px-4 border-b text-black">
+                          Location
+                        </th>
+                        <th className="py-2 px-4 border-b text-black">
+                          Start Time
+                        </th>
+                        <th className="py-2 px-4 border-b text-black">
+                          End Time
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData[studio][date].map((session, index) => (
+                        <tr key={index} className="hover:bg-gray-100">
+                          <td className="py-2 px-4 border-b text-black">
+                            {session.session_name}
+                          </td>
+                          <td className="py-2 px-4 border-b text-black">
+                            {session.instructor}
+                          </td>
+                          <td className="py-2 px-4 border-b text-black">
+                            {session.location}
+                          </td>
+                          <td className="py-2 px-4 border-b text-black">
+                            {new Date(session.start_time).toLocaleString()}
+                          </td>
+                          <td className="py-2 px-4 border-b text-black">
+                            {new Date(session.end_time).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               ))}
             </div>
