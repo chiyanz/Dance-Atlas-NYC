@@ -14,6 +14,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudio, setSelectedStudio] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -53,8 +54,23 @@ const Home: React.FC = () => {
     setFilteredData(filtered);
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    if (isDarkMode) {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
+  };
+
   return (
-    <div className="p-6 bg-black min-h-screen text-white">
+    <div className={`p-6 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'} min-h-screen`}>
+      <button
+        onClick={toggleDarkMode}
+        className="mb-4 p-2 border border-gray-300 rounded"
+      >
+        Toggle Dark Mode
+      </button>
       {loading ? (
         <div className="text-center">
           <p>Loading...</p>
@@ -67,7 +83,7 @@ const Home: React.FC = () => {
               <select
                 onChange={(e) => setSelectedStudio(e.target.value)}
                 value={selectedStudio}
-                className="border border-gray-300 rounded p-2 text-black"
+                className={`border border-gray-300 rounded p-2 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
               >
                 <option value="">All</option>
                 {Object.keys(data).map((studio) => (
@@ -82,7 +98,7 @@ const Home: React.FC = () => {
               <select
                 onChange={(e) => setSelectedDate(e.target.value)}
                 value={selectedDate}
-                className="border border-gray-300 rounded p-2 text-black"
+                className={`border border-gray-300 rounded p-2 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
               >
                 <option value="">All</option>
                 {Array.from(
@@ -105,42 +121,32 @@ const Home: React.FC = () => {
               {Object.keys(filteredData[studio]).map((date) => (
                 <div key={date} className="mb-6">
                   <h3 className="text-xl font-semibold mb-2">{date}</h3>
-                  <table className="min-w-full bg-white border border-gray-200 rounded">
+                  <table className={`min-w-full ${isDarkMode ? 'bg-gray-800 border-gray-600' : 'bg-white border-gray-200'} rounded`}>
                     <thead>
                       <tr>
-                        <th className="py-2 px-4 border-b text-black">
-                          Session
-                        </th>
-                        <th className="py-2 px-4 border-b text-black">
-                          Instructor
-                        </th>
-                        <th className="py-2 px-4 border-b text-black">
-                          Location
-                        </th>
-                        <th className="py-2 px-4 border-b text-black">
-                          Start Time
-                        </th>
-                        <th className="py-2 px-4 border-b text-black">
-                          End Time
-                        </th>
+                        <th className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>Session</th>
+                        <th className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>Instructor</th>
+                        <th className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>Location</th>
+                        <th className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>Start Time</th>
+                        <th className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>End Time</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredData[studio][date].map((session, index) => (
-                        <tr key={index} className="hover:bg-gray-100">
-                          <td className="py-2 px-4 border-b text-black">
+                        <tr key={index} className={isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}>
+                          <td className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>
                             {session.session_name}
                           </td>
-                          <td className="py-2 px-4 border-b text-black">
+                          <td className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>
                             {session.instructor}
                           </td>
-                          <td className="py-2 px-4 border-b text-black">
+                          <td className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>
                             {session.location}
                           </td>
-                          <td className="py-2 px-4 border-b text-black">
+                          <td className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>
                             {new Date(session.start_time).toLocaleString()}
                           </td>
-                          <td className="py-2 px-4 border-b text-black">
+                          <td className={`py-2 px-4 border-b ${isDarkMode ? 'text-white' : 'text-black'}`}>
                             {new Date(session.end_time).toLocaleString()}
                           </td>
                         </tr>
