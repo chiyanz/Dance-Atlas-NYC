@@ -12,7 +12,7 @@ import os
 import re
 import argparse
 from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo  # Import the ZoneInfo class
+from zoneinfo import ZoneInfo
 
 class StudioCrawler: 
     """
@@ -131,7 +131,7 @@ class StudioCrawler:
                   'session_name': session_name,
                   'instructor': instructor
                 }
-                self.data['Peri'].append(info) #TODO: future storage in csv or database
+                self.data['Peri'].append(info)
             except Exception as e:
                print(f'no classes found on day {i}')
       
@@ -155,11 +155,6 @@ class StudioCrawler:
               dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
               dates[i].click()
             print(f"day {i} clicked")
-            # reloate dates
-            #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
-            #     WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'bw-widget__sessions')))
-            # except:
-            #     print("Page did not load in 10 seconds!")
 
             classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
             try:
@@ -174,9 +169,8 @@ class StudioCrawler:
                   'session_name': session_name,
                   'instructor': instructor
                 }
-                self.data['PMT'].append(info) #TODO: future storage in csv or database
+                self.data['PMT'].append(info)
             except Exception as e:
-              # print(f'no classes found on day {i}')
                print('encountered exception', e)
 
     def modega_handler(self):
@@ -289,8 +283,8 @@ if __name__ == "__main__":
 
   # crawl chosen sites and store in firebase db
   crawler = StudioCrawler(studio_urls, 'dev')
-  crawler.crawlSessions()
-  crawler.storeData()
+  crawler.main()
+  # crawler.storeData()
 
   # store data locally for debugging
   # studios = {studio: [] for studio, _ in studio_urls.items()}
