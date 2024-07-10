@@ -1,5 +1,6 @@
 from firestore_util import Firebase
-
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -43,7 +44,10 @@ class StudioCrawler:
         options.add_argument("--ssl-protocol=any")
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
         options.add_argument(f'user-agent={user_agent}')
-        self.driver = webdriver.Chrome(options=options)
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=options)
+        self.driver = driver
+        # self.driver = webdriver.Chrome(options=options)
         # self.driver.execute_script(self.javascript_code)
         self.studios = studios
         self.data = {name: [] for name, _ in studios.items()}

@@ -1,2 +1,0 @@
-    "Peri": "https://www.peridance.com/openclasses.cfm",
-    "Modega": "https://sutrapro.com/modega"
