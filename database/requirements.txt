@@ -1,5 +1,5 @@
 selenium==4.22.0
- webdriver-manager==4.0.1
+webdriver-manager==4.0.1
 urllib3==1.26.16
 firebase-admin==6.5.0
 firebase==4.0.1
