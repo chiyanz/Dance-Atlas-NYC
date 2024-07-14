@@ -4,19 +4,32 @@ import {
   cert,
   getApps,
 } from "firebase-admin/app";
-import { credential } from "firebase-admin";
+import { type ServiceAccount, credential } from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import path from "path";
 
-const serviceAccountPath =
-  process.env.SERVICE_ACCOUNT_KEY_PATH ||
-  path.resolve(
-    "C:\\Users\\jonat\\Projects\\Dance-Atlas-NYC\\dance-atlas-nyc\\app\\credentials\\serviceAccountKey.json"
-  );
+const getEnvVar = (key: string) => {
+  const value = process.env[key];
+  if (!value) {
+    throw new Error(`Environment variable ${key} is not set`);
+  }
+  return value;
+};
+
+const privateKey = getEnvVar("NEXT_PUBLIC_FIREBASE_PRIVATE_KEY").replace(
+  /\\n/g,
+  "\n"
+);
+
+const serViceAccountObj: ServiceAccount = {
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  privateKey: privateKey,
+  clientEmail: process.env.NEXT_PUBLIC_FIREBASE_CLIENT_EMAIL,
+};
 
 if (!getApps().length) {
   initializeApp({
-    credential: cert(serviceAccountPath),
+    credential: credential.cert(serViceAccountObj),
   });
 }
 
