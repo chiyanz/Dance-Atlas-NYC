@@ -1,7 +1,8 @@
 "use client";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
+// this page is meant to be the root landing page that can demo what the database is capable of
+// optionally include a video of how to utilize it and its features
 export default function Home() {
   const router = useRouter();
 
