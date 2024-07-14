@@ -5,7 +5,7 @@ import os
 class Firebase():
 
   def __init__(self) -> None:
-    default_authentication_path = "./credentials/serviceAccountKey.json"
+    default_authentication_path = "./serviceAccountKey.json"
     self.authentication_path = os.getenv("FIREBASE_CREDENTIAL", default_authentication_path)
 
   def create_firebase_admin(self):
@@ -17,18 +17,3 @@ class Firebase():
     except Exception as e:
       print('firebase auth err: ', e)
   
-
-if __name__ == "__main__": 
-  # TODO
-  firebase_instance = Firebase()
-  db = firebase_instance.create_firebase_admin()
-  doc_ref = db.collection("users").document("test_user")
-  doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
-
-
-
-
-
-
-
-

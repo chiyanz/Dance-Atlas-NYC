@@ -7,3 +7,6 @@ credentials
 # cache
 __pycache__
 
+# crential files
+serviceAccountKey.json
+
