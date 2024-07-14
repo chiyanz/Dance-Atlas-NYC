@@ -30,6 +30,14 @@ jobs:
         run: pip list
         working-directory: ./database
 
+      - name: Print Python executable path
+        run: which python
+        working-directory: ./database
+
+      - name: Print working directory
+        run: pwd
+        working-directory: ./database
+
       - name: Write Firebase service account to file
         run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" > serviceAccountKey.json
         working-directory: ./database  # Ensure you are in the correct directory
@@ -39,5 +47,5 @@ jobs:
         working-directory: ./database  # Ensure you are in the correct directory
 
       - name: Run studio crawler
-        run: python studio_crawler.py --mode prod
+        run: python ./studio_crawler.py
         working-directory: ./database  # Ensure you are in the correct directory
