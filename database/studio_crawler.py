@@ -326,7 +326,7 @@ if __name__ == "__main__":
   studio_urls = config['urls']
 
   # crawl chosen sites and store in firebase db
-  crawler = StudioCrawler(studio_urls, 'dev')
+  crawler = StudioCrawler(studio_urls, mode)
   crawler.main()
   # crawler.storeData()
 
