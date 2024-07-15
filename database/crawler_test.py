@@ -1,6 +1,7 @@
-from studio_crawler import StudioCrawler 
+from studio_crawler import StudioCrawler
 import unittest
 
-class CrawlerTest():
-  def __init__(self) -> None:
-    pass
+
+class CrawlerTest:
+    def __init__(self) -> None:
+        pass

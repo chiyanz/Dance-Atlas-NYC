@@ -128,14 +128,16 @@ class StudioCrawler:
                 start_time = datetime.fromisoformat(start_time).replace(tzinfo=edt_timezone)
                 end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
                 end_time = datetime.fromisoformat(end_time).replace(tzinfo=edt_timezone)
-
                 session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
                 instructor = session.find_element(By.XPATH, ".//div[@class='bw-session__staff']").text
+                url = self.driver.current_url
+
                 info = {
                   'start_time': start_time,
                   'end_time': end_time,
                   'session_name': session_name,
-                  'instructor': instructor
+                  'instructor': instructor,
+                  'url': url
                 }
                 self.data['Peri'].append(info)
             except Exception as e:
@@ -169,11 +171,14 @@ class StudioCrawler:
                 end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
                 session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
                 instructor = session.find_element(By.XPATH, ".//div[@class='bw-session__staff']").text
+                url = self.driver.current_url
+
                 info = {
                   'start_time': start_time,
                   'end_time': end_time,
                   'session_name': session_name,
-                  'instructor': instructor
+                  'instructor': instructor,
+                  'url': url
                 }
                 self.data['PMT'].append(info)
             except Exception as e:
@@ -218,12 +223,15 @@ class StudioCrawler:
               misc_info = session.find_elements(By.XPATH, ".//p[contains(@class, 'card-text')]")
               instructor = misc_info[1].text
               location = misc_info[2].text
+              url = self.driver.current_url
+
               info = {
                 'start_time': start_time,
                 'end_time': end_time,
                 'session_name': session_name,
                 'instructor': instructor,
-                'location': location
+                'location': location,
+                'url': url
               }
               self.data['Modega'].append(info)
           except Exception as e:
@@ -252,14 +260,16 @@ class StudioCrawler:
                 session_level = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__level')]").text
                 session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
                 session_location = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__location')]").text
+                url = self.driver.current_url
 
                 info = {
-                    "start_time": session_starttime,
-                    "end_time": session_endtime,
-                    "session_name": session_name,
-                    "level": session_level,
-                    "instructor": session_staff,
-                    "location": session_location
+                    'start_time': session_starttime,
+                    'end_time': session_endtime,
+                    'session_name': session_name,
+                    'level': session_level,
+                    'instructor': session_staff,
+                    'location': session_location,
+                    'url': url
                 }
                 self.data['BDC'].append(info)
             except Exception as e:
@@ -290,6 +300,7 @@ class StudioCrawler:
                 session_level = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__level')]").text
                 session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
                 session_location = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__location')]").text
+                url = self.driver.current_url
 
                 info = {
                     "start_time": session_starttime,
@@ -297,7 +308,8 @@ class StudioCrawler:
                     "session_name": session_name,
                     "level": session_level,
                     "instructor": session_staff,
-                    "location": session_location
+                    "location": session_location,
+                    "url": url
                 }
                 self.data['Brickhouse'].append(info)
             except Exception as e:
