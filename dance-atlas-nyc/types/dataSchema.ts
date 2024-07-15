@@ -8,4 +8,5 @@ export interface SessionData {
   location?: string;
   session_name: string;
   start_time: Date; // Will store as Date after conversion
+  url?: string;
 }

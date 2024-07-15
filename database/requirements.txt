@@ -4,3 +4,4 @@ urllib3==1.26.16
 firebase-admin==6.5.0
 firebase==4.0.1
 google-cloud-storage==2.16.0
+black==24.4.2
