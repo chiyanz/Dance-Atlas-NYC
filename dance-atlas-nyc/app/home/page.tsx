@@ -15,7 +15,8 @@ const Home: React.FC = () => {
   const [selectedStudio, setSelectedStudio] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [searchColumn, setSearchColumn] = useState<string>("session_name");
+  const [searchColumn, setSearchColumn] =
+    useState<keyof SessionData>("session_name");
   const [searchText, setSearchText] = useState<string>("");
 
   useEffect(() => {
@@ -59,7 +60,7 @@ const Home: React.FC = () => {
       Object.keys(filtered).forEach((studio) => {
         Object.keys(filtered[studio]).forEach((date) => {
           filtered[studio][date] = filtered[studio][date].filter((session) =>
-            new RegExp(searchText, "i").test(session[searchColumn])
+            new RegExp(searchText, "i").test(session[searchColumn] as string)
           );
         });
       });
@@ -140,7 +141,9 @@ const Home: React.FC = () => {
           </div>
           <div className="flex">
             <select
-              onChange={(e) => setSearchColumn(e.target.value)}
+              onChange={(e) =>
+                setSearchColumn(e.target.value as keyof SessionData)
+              }
               value={searchColumn}
               className={`border border-gray-300 rounded p-2 grow ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
