@@ -138,11 +138,11 @@ const Home: React.FC = () => {
                 ))}
             </select>
           </div>
-          <div className="flex items-center border border-gray-300 rounded p-2 flex-grow">
+          <div className="flex">
             <select
               onChange={(e) => setSearchColumn(e.target.value)}
               value={searchColumn}
-              className={`border-none outline-none flex-grow ${
+              className={`border border-gray-300 rounded p-2 grow ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             >
@@ -156,7 +156,7 @@ const Home: React.FC = () => {
               onChange={(e) => setSearchText(e.target.value)}
               value={searchText}
               placeholder="Search"
-              className={`border-none outline-none flex-grow ${
+              className={`border border-gray-300 rounded p-2 grow ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             />
