@@ -4,6 +4,7 @@ import {
   cert,
   getApps,
 } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
 import { type ServiceAccount, credential } from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
 import path from "path";
@@ -34,5 +35,5 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
-
-export { db };
+const auth = getAuth();
+export { db, auth };

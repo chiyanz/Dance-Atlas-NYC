@@ -92,7 +92,7 @@ const Home: React.FC = () => {
     };
 
     filterData();
-  }, [selectedStudio, selectedDate, searchColumn, searchText]);
+  }, [data, selectedStudio, selectedDate, searchColumn, searchText]);
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
