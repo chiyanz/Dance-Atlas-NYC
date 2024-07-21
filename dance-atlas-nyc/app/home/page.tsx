@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SessionData } from "../../types/dataSchema";
 
 interface OrganizedData {
@@ -18,6 +19,7 @@ const Home: React.FC = () => {
   const [searchColumn, setSearchColumn] =
     useState<keyof SessionData>("session_name");
   const [searchText, setSearchText] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -101,6 +103,17 @@ const Home: React.FC = () => {
     } else {
       document.documentElement.classList.add("dark");
     }
+  };
+
+  const handleHomeClick = () => {
+    router.push("/");
+  };
+
+  const handleLogoutClick = async () => {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
+    router.push("/");
   };
 
   const getSortedDates = (dates: string[]) => {
@@ -197,12 +210,26 @@ const Home: React.FC = () => {
             />
           </div>
         </div>
-        <button
-          onClick={toggleDarkMode}
-          className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700 ml-4"
-        >
-          Toggle Dark Mode
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={handleHomeClick}
+            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
+          >
+            Home
+          </button>
+          <button
+            onClick={handleLogoutClick}
+            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
+          >
+            Logout
+          </button>
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
+          >
+            Toggle Dark Mode
+          </button>
+        </div>
       </div>
       {loading ? (
         <div className="text-center">

@@ -1,13 +1,21 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-// this page is meant to be the root landing page that can demo what the database is capable of
-// optionally include a video of how to utilize it and its features
+// This page is meant to be the root landing page that can demo what the database is capable of
+// Optionally include a video of how to utilize it and its features
 export default function Home() {
   const router = useRouter();
 
   const handleSearchClick = () => {
     router.push("/home");
+  };
+
+  const handleLoginClick = () => {
+    router.push("/login");
+  };
+
+  const handleSignupClick = () => {
+    router.push("/signup");
   };
 
   return (
@@ -16,10 +24,16 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Dance Atlas NYC</h1>
           <div className="space-x-4">
-            <button className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm">
+            <button
+              onClick={handleSignupClick}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+            >
               Sign Up
             </button>
-            <button className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm">
+            <button
+              onClick={handleLoginClick}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm"
+            >
               Log In
             </button>
           </div>
@@ -36,6 +50,10 @@ export default function Home() {
         >
           Search
         </button>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+          Please note: Dance Atlas NYC is an independent, non-profit resource
+          for the dance community and is not affiliated with any dance studios.
+        </p>
       </main>
 
       <footer className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
