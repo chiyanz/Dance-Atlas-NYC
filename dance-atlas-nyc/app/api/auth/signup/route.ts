@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
       email,
       password: hashedPassword,
       createdAt: new Date().toISOString(),
+      preferences: {},
     });
 
     return new NextResponse(JSON.stringify({ message: "User created" }), {

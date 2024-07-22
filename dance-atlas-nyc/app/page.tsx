@@ -7,7 +7,7 @@ export default function Home() {
   const router = useRouter();
 
   const handleSearchClick = () => {
-    router.push("/home");
+    router.push("/classes");
   };
 
   const handleLoginClick = () => {

@@ -32,7 +32,7 @@ export default function SignUp() {
       });
 
       if (loginRes.ok) {
-        router.push("/home");
+        router.push("/classes");
       } else {
         const loginData = await loginRes.json();
         setMessage(loginData.message || loginData.error);

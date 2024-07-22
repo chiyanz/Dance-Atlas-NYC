@@ -1,14 +1,16 @@
-// app/login/page.tsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { getAuth, signInWithCustomToken } from "firebase/auth";
+import Link from "next/link";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
+  const auth = getAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,10 +23,16 @@ export default function Login() {
     });
 
     const data = await res.json();
-    setMessage(data.message || data.error);
 
     if (res.ok) {
-      router.push("/home");
+      try {
+        await signInWithCustomToken(auth, data.token);
+        router.push("/home");
+      } catch (error) {
+        setMessage("Failed to sign in with custom token.");
+      }
+    } else {
+      setMessage(data.message || data.error);
     }
   };
 
@@ -61,6 +69,11 @@ export default function Login() {
         <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
           {message}
         </p>
+        <div className="mt-4 text-center">
+          <Link href="/signup" className="text-blue-600 dark:text-blue-400">
+            Sign Up
+          </Link>
+        </div>
       </div>
     </div>
   );

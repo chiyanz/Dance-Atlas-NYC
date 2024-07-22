@@ -1,365 +1,92 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
-import { SessionData } from "../../types/dataSchema";
+import { getAuth, signOut } from "firebase/auth";
 
-interface OrganizedData {
-  [studioName: string]: {
-    [date: string]: SessionData[];
-  };
-}
-
-const Home: React.FC = () => {
-  const [data, setData] = useState<OrganizedData>({});
-  const [filteredData, setFilteredData] = useState<OrganizedData>({});
-  const [loading, setLoading] = useState<boolean>(true);
-  const [selectedStudio, setSelectedStudio] = useState<string>("");
-  const [selectedDate, setSelectedDate] = useState<string>("");
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
-  const [searchColumn, setSearchColumn] =
-    useState<keyof SessionData>("session_name");
-  const [searchText, setSearchText] = useState<string>("");
+export default function Home() {
+  const { user, loading } = useAuth();
   const router = useRouter();
+  const auth = getAuth();
+  const [preferences, setPreferences] = useState("");
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        const response = await fetch("/api");
-        if (response.ok) {
-          const data: OrganizedData = await response.json();
-
-          // Filter out past dates based on EST timezone
-          const now = new Date();
-          const estOffset = -5 * 60; // EST offset in minutes
-          const today = new Date(now.getTime() + estOffset * 60 * 1000);
-          today.setHours(0, 0, 0, 0); // Set to midnight
-
-          const filteredData = Object.keys(data).reduce((acc, studio) => {
-            const filteredDates = Object.keys(data[studio])
-              .filter((date) => {
-                const sessionDate = new Date(date);
-                return sessionDate >= today;
-              })
-              .reduce((acc, date) => {
-                acc[date] = data[studio][date];
-                return acc;
-              }, {} as { [date: string]: SessionData[] });
-
-            if (Object.keys(filteredDates).length > 0) {
-              acc[studio] = filteredDates;
-            }
-
-            return acc;
-          }, {} as OrganizedData);
-
-          setData(filteredData);
-          setFilteredData(filteredData);
-        } else {
-          console.error("Failed to fetch data from API");
-        }
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      } finally {
-        setLoading(false);
-      }
+    if (!loading && !user) {
+      router.push("/login"); // Redirect to login if not logged in
+    } else if (user) {
+      // Fetch user preferences from Firestore
+      fetch(`/api/preferences?uid=${user.uid}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setPreferences(data.preferences || "");
+        });
     }
-    fetchData();
-  }, []);
+  }, [user, loading, router]);
 
-  useEffect(() => {
-    const filterData = () => {
-      let filtered = { ...data };
-      if (selectedStudio) {
-        filtered = { [selectedStudio]: filtered[selectedStudio] };
-      }
-      if (selectedDate) {
-        Object.keys(filtered).forEach((studio) => {
-          filtered[studio] = { [selectedDate]: filtered[studio][selectedDate] };
-        });
-      }
-
-      // Apply search filter
-      if (searchText) {
-        Object.keys(filtered).forEach((studio) => {
-          Object.keys(filtered[studio]).forEach((date) => {
-            filtered[studio][date] = filtered[studio][date].filter((session) =>
-              new RegExp(searchText, "i").test(session[searchColumn] as string)
-            );
-          });
-        });
-      }
-
-      setFilteredData(filtered);
-    };
-
-    filterData();
-  }, [data, selectedStudio, selectedDate, searchColumn, searchText]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
+  const handleSave = async () => {
+    if (user) {
+      const res = await fetch("/api/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uid: user.uid, preferences }),
+      });
+      const data = await res.json();
+      alert(data.message || data.error);
     }
   };
 
-  const handleHomeClick = () => {
-    router.push("/");
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/login");
   };
 
-  const handleLogoutClick = async () => {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-    });
-    router.push("/");
+  const handleSearch = () => {
+    router.push("/classes");
   };
 
-  const getSortedDates = (dates: string[]) => {
-    return dates.sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-  };
-
-  const hasClasses = Object.keys(filteredData).some(
-    (studio) =>
-      filteredData[studio] &&
-      Object.keys(filteredData[studio]).some(
-        (date) =>
-          filteredData[studio][date] && filteredData[studio][date].length > 0
-      )
-  );
-
-  const sortSessionsByStartTime = (sessions: SessionData[]) => {
-    return sessions.sort(
-      (a, b) =>
-        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
-    );
-  };
+  if (loading) {
+    return <div className="text-center text-white">Loading...</div>;
+  }
 
   return (
-    <div
-      className={`p-6 ${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      } min-h-screen`}
-    >
-      <div className="mb-4 flex flex-wrap items-center justify-between">
-        <div className="flex space-x-4">
-          <div>
-            <select
-              onChange={(e) => setSelectedStudio(e.target.value)}
-              value={selectedStudio}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Studios</option>
-              {Object.keys(data).map((studio) => (
-                <option key={studio} value={studio}>
-                  {studio}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <select
-              onChange={(e) => setSelectedDate(e.target.value)}
-              value={selectedDate}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Dates</option>
-              {Array.from(
-                new Set(
-                  Object.keys(data).flatMap((studio) =>
-                    Object.keys(data[studio])
-                  )
-                )
-              )
-                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-                .map((date) => (
-                  <option key={date} value={date}>
-                    {date}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <div className="flex items-center grow">
-            <select
-              onChange={(e) =>
-                setSearchColumn(e.target.value as keyof SessionData)
-              }
-              value={searchColumn}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="session_name">Session Name</option>
-              <option value="instructor">Instructor</option>
-              <option value="start_time">Start Time</option>
-              <option value="end_time">End Time</option>
-            </select>
-            <input
-              type="text"
-              onChange={(e) => setSearchText(e.target.value)}
-              value={searchText}
-              placeholder="Search"
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            />
-          </div>
-        </div>
+    <div className="p-4 min-h-screen bg-gray-100 dark:bg-gray-900">
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-black dark:text-white">
+          My Preferences
+        </h1>
         <div className="flex space-x-4">
           <button
-            onClick={handleHomeClick}
+            onClick={handleSearch}
             className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
           >
-            Home
+            Search
           </button>
           <button
-            onClick={handleLogoutClick}
+            onClick={handleLogout}
             className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
           >
             Logout
           </button>
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
-          >
-            Toggle Dark Mode
-          </button>
         </div>
       </div>
-      {loading ? (
-        <div className="text-center">
-          <p>Loading...</p>
-        </div>
-      ) : (
-        <div>
-          {!hasClasses ? (
-            <div className="text-center text-xl mt-10">No classes found</div>
-          ) : (
-            Object.keys(filteredData).map((studio) => (
-              <div key={studio} className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">{studio}</h2>
-                {getSortedDates(Object.keys(filteredData[studio])).map(
-                  (date) => (
-                    <div key={date} className="mb-6">
-                      <h3 className="text-xl font-semibold mb-2">{date}</h3>
-                      {filteredData[studio][date] &&
-                      filteredData[studio][date].length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table
-                            className={`min-w-full ${
-                              isDarkMode
-                                ? "bg-gray-800 border-gray-600"
-                                : "bg-white border-gray-200"
-                            } rounded`}
-                          >
-                            <thead>
-                              <tr>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Session
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Instructor
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Start Time
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  End Time
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sortSessionsByStartTime(
-                                filteredData[studio][date]
-                              ).map((session, index) => (
-                                <tr
-                                  key={index}
-                                  className={
-                                    isDarkMode
-                                      ? "hover:bg-gray-700"
-                                      : "hover:bg-gray-100"
-                                  }
-                                >
-                                  <td
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
-                                    <a
-                                      href={session.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:underline"
-                                    >
-                                      {session.session_name}
-                                    </a>
-                                  </td>
-                                  <td
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
-                                    {session.instructor}
-                                  </td>
-                                  <td
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
-                                    {new Date(
-                                      session.start_time
-                                    ).toLocaleString()}
-                                  </td>
-                                  <td
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
-                                    {new Date(
-                                      session.end_time
-                                    ).toLocaleString()}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <div className="text-center text-xl mt-10">
-                          No matching classes
-                        </div>
-                      )}
-                    </div>
-                  )
-                )}
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-xl mx-auto">
+        <textarea
+          className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          value={preferences}
+          onChange={(e) => setPreferences(e.target.value)}
+          rows={6}
+          placeholder="Enter your class preferences here..."
+        />
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 text-white py-3 mt-4 rounded-md hover:bg-blue-700 transition duration-300 w-full"
+        >
+          Save Preferences
+        </button>
+      </div>
     </div>
   );
-};
-
-export default Home;
+}

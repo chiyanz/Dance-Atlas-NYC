@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, db } from "@/utils/firebaseAdmin";
 import bcrypt from "bcryptjs";
-import cookie from "cookie";
 
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
@@ -26,16 +25,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return new NextResponse(JSON.stringify({ message: "Logged in" }), {
-      headers: {
-        "Set-Cookie": cookie.serialize("token", userRecord.uid, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV !== "development",
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-          sameSite: "strict",
-          path: "/",
-        }),
-      },
+    // Create a custom token
+    const token = await auth.createCustomToken(userRecord.uid);
+
+    return new NextResponse(JSON.stringify({ token }), {
+      status: 200,
     });
   } catch (error: any) {
     if (error instanceof Error) {
