@@ -202,14 +202,14 @@ class StudioCrawler:
             classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(concat(' ', normalize-space(@class), ' '), ' p-1 ') and contains(concat(' ', normalize-space(@class), ' '), ' card-body ')]")))
             for session in classes:
               class_time = session.find_element(By.XPATH, ".//p[contains(@class, 'dateTimeText') and contains(@class, 'card-text')]").text
-              start_time = re.search(r"(\d+:\d+\s(?:AM|PM)\sPDT)", class_time).group(1)
-              start_time = datetime.strptime(start_time, '%I:%M %p PDT').time()
+              start_time_str = re.search(r"(\d+:\d+\s(?:AM|PM)\sPDT)", class_time).group(1)
+              start_time = datetime.strptime(start_time_str, '%I:%M %p %Z').replace(tzinfo=ZoneInfo("America/Los_Angeles"))
+              # modega autometically displays time in local time zone, need to convert to EDT
+              # Convert PDT time to EDT
+              start_time = start_time.astimezone(ZoneInfo("America/New_York"))
 
               today = datetime.now().date()
-              start_time = datetime.combine(today, start_time)
-
-              pacific_time_zone = ZoneInfo("America/Los_Angeles")
-              start_time = start_time.replace(tzinfo=pacific_time_zone) + timedelta(days=i)
+              start_time = datetime.combine(today, start_time.timetz())  + timedelta(days=i)
 
               # regex search for the duration to calculate end time
               match = re.search(r"\((\d+) min\)", class_time)
