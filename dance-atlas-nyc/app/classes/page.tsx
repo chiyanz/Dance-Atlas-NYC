@@ -69,7 +69,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const filterData = () => {
-      let filtered = { ...data };
+      let filtered = JSON.parse(JSON.stringify(data));
+      console.log("data: ", data);
+      console.log(filtered);
       if (selectedStudio) {
         filtered = { [selectedStudio]: filtered[selectedStudio] };
       }
@@ -80,15 +82,14 @@ const Home: React.FC = () => {
       }
 
       // Apply search filter
-      if (searchText) {
-        Object.keys(filtered).forEach((studio) => {
-          Object.keys(filtered[studio]).forEach((date) => {
-            filtered[studio][date] = filtered[studio][date].filter((session) =>
+      Object.keys(filtered).forEach((studio) => {
+        Object.keys(filtered[studio]).forEach((date) => {
+          filtered[studio][date] = filtered[studio][date].filter(
+            (session: SessionData) =>
               new RegExp(searchText, "i").test(session[searchColumn] as string)
-            );
-          });
+          );
         });
-      }
+      });
 
       setFilteredData(filtered);
     };
@@ -201,7 +202,10 @@ const Home: React.FC = () => {
             </select>
             <input
               type="text"
-              onChange={(e) => setSearchText(e.target.value)}
+              onChange={(e) => {
+                console.log(e.target.value);
+                setSearchText(e.target.value);
+              }}
               value={searchText}
               placeholder="Search"
               className={`border border-gray-300 rounded p-2 grow ${
@@ -246,110 +250,108 @@ const Home: React.FC = () => {
                 {getSortedDates(Object.keys(filteredData[studio])).map(
                   (date) => (
                     <div key={date} className="mb-6">
-                      <h3 className="text-xl font-semibold mb-2">{date}</h3>
                       {filteredData[studio][date] &&
-                      filteredData[studio][date].length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table
-                            className={`min-w-full ${
-                              isDarkMode
-                                ? "bg-gray-800 border-gray-600"
-                                : "bg-white border-gray-200"
-                            } rounded`}
-                          >
-                            <thead>
-                              <tr>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Session
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Instructor
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Start Time
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  End Time
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sortSessionsByStartTime(
-                                filteredData[studio][date]
-                              ).map((session, index) => (
-                                <tr
-                                  key={index}
-                                  className={
-                                    isDarkMode
-                                      ? "hover:bg-gray-700"
-                                      : "hover:bg-gray-100"
-                                  }
-                                >
-                                  <td
+                        filteredData[studio][date].length > 0 && (
+                          <div className="overflow-x-auto">
+                            <h3 className="text-xl font-semibold mb-2">
+                              {date}
+                            </h3>
+                            <table
+                              className={`min-w-full ${
+                                isDarkMode
+                                  ? "bg-gray-800 border-gray-600"
+                                  : "bg-white border-gray-200"
+                              } rounded`}
+                            >
+                              <thead>
+                                <tr>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    <a
-                                      href={session.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:underline"
-                                    >
-                                      {session.session_name}
-                                    </a>
-                                  </td>
-                                  <td
+                                    Session
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {session.instructor}
-                                  </td>
-                                  <td
+                                    Instructor
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {new Date(
-                                      session.start_time
-                                    ).toLocaleString()}
-                                  </td>
-                                  <td
+                                    Start Time
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {new Date(
-                                      session.end_time
-                                    ).toLocaleString()}
-                                  </td>
+                                    End Time
+                                  </th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <div className="text-center text-xl mt-10">
-                          No matching classes
-                        </div>
-                      )}
+                              </thead>
+                              <tbody>
+                                {sortSessionsByStartTime(
+                                  filteredData[studio][date]
+                                ).map((session, index) => (
+                                  <tr
+                                    key={index}
+                                    className={
+                                      isDarkMode
+                                        ? "hover:bg-gray-700"
+                                        : "hover:bg-gray-100"
+                                    }
+                                  >
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      <a
+                                        href={session.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:underline"
+                                      >
+                                        {session.session_name}
+                                      </a>
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {session.instructor}
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {new Date(
+                                        session.start_time
+                                      ).toLocaleString()}
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {new Date(
+                                        session.end_time
+                                      ).toLocaleString()}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                     </div>
                   )
                 )}
