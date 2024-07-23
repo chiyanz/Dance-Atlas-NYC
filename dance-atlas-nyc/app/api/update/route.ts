@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const userDoc = doc(firestore, "users", uid);
+    console.log(uid, preferences);
     await updateDoc(userDoc, { preferences });
     return new NextResponse(
       JSON.stringify({ message: "Preferences updated successfully" }),

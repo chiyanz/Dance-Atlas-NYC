@@ -69,7 +69,9 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     const filterData = () => {
-      let filtered = { ...data };
+      let filtered = JSON.parse(JSON.stringify(data));
+      console.log("data: ", data);
+      console.log(filtered);
       if (selectedStudio) {
         filtered = { [selectedStudio]: filtered[selectedStudio] };
       }
@@ -80,15 +82,14 @@ const Home: React.FC = () => {
       }
 
       // Apply search filter
-      if (searchText) {
-        Object.keys(filtered).forEach((studio) => {
-          Object.keys(filtered[studio]).forEach((date) => {
-            filtered[studio][date] = filtered[studio][date].filter((session) =>
+      Object.keys(filtered).forEach((studio) => {
+        Object.keys(filtered[studio]).forEach((date) => {
+          filtered[studio][date] = filtered[studio][date].filter(
+            (session: SessionData) =>
               new RegExp(searchText, "i").test(session[searchColumn] as string)
-            );
-          });
+          );
         });
-      }
+      });
 
       setFilteredData(filtered);
     };
@@ -138,105 +139,110 @@ const Home: React.FC = () => {
 
   return (
     <div
-      className={`p-4 ${
+      className={`${
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      } min-h-screen`}
+      } min-h-screen w-full`}
     >
-      <div className="mb-4 flex flex-wrap items-center justify-between">
-        <div className="flex space-x-4">
-          <div>
-            <select
-              onChange={(e) => setSelectedStudio(e.target.value)}
-              value={selectedStudio}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Studios</option>
-              {Object.keys(data).map((studio) => (
-                <option key={studio} value={studio}>
-                  {studio}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <select
-              onChange={(e) => setSelectedDate(e.target.value)}
-              value={selectedDate}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Dates</option>
-              {Array.from(
-                new Set(
-                  Object.keys(data).flatMap((studio) =>
-                    Object.keys(data[studio])
-                  )
-                )
-              )
-                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-                .map((date) => (
-                  <option key={date} value={date}>
-                    {date}
+      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
+        <div className="mb-2 flex flex-wrap items-center justify-between">
+          <div className="flex space-x-4">
+            <div>
+              <select
+                onChange={(e) => setSelectedStudio(e.target.value)}
+                value={selectedStudio}
+                className={`border border-gray-300 rounded p-2 grow ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                }`}
+              >
+                <option value="">All Studios</option>
+                {Object.keys(data).map((studio) => (
+                  <option key={studio} value={studio}>
+                    {studio}
                   </option>
                 ))}
-            </select>
+              </select>
+            </div>
+            <div>
+              <select
+                onChange={(e) => setSelectedDate(e.target.value)}
+                value={selectedDate}
+                className={`border border-gray-300 rounded p-2 grow ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                }`}
+              >
+                <option value="">All Dates</option>
+                {Array.from(
+                  new Set(
+                    Object.keys(data).flatMap((studio) =>
+                      Object.keys(data[studio])
+                    )
+                  )
+                )
+                  .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+                  .map((date) => (
+                    <option key={date} value={date}>
+                      {date}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className="flex items-center grow">
+              <select
+                onChange={(e) =>
+                  setSearchColumn(e.target.value as keyof SessionData)
+                }
+                value={searchColumn}
+                className={`border border-gray-300 rounded p-2 grow ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                }`}
+              >
+                <option value="session_name">Session Name</option>
+                <option value="instructor">Instructor</option>
+                <option value="start_time">Start Time</option>
+                <option value="end_time">End Time</option>
+              </select>
+              <input
+                type="text"
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  setSearchText(e.target.value);
+                }}
+                value={searchText}
+                placeholder="Search"
+                className={`border border-gray-300 rounded p-2 grow ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                }`}
+              />
+            </div>
           </div>
-          <div className="flex items-center grow">
-            <select
-              onChange={(e) =>
-                setSearchColumn(e.target.value as keyof SessionData)
-              }
-              value={searchColumn}
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
+          <div className="flex space-x-4">
+            <button
+              onClick={handleHomeClick}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
             >
-              <option value="session_name">Session Name</option>
-              <option value="instructor">Instructor</option>
-              <option value="start_time">Start Time</option>
-              <option value="end_time">End Time</option>
-            </select>
-            <input
-              type="text"
-              onChange={(e) => setSearchText(e.target.value)}
-              value={searchText}
-              placeholder="Search"
-              className={`border border-gray-300 rounded p-2 grow ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            />
+              Home
+            </button>
+            <button
+              onClick={handleLogoutClick}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+            >
+              Logout
+            </button>
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
+            >
+              Toggle Dark Mode
+            </button>
           </div>
         </div>
-        <div className="flex space-x-4">
-          <button
-            onClick={handleHomeClick}
-            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
-          >
-            Home
-          </button>
-          <button
-            onClick={handleLogoutClick}
-            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
-          >
-            Logout
-          </button>
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
-          >
-            Toggle Dark Mode
-          </button>
-        </div>
-      </div>
+      </header>
       {loading ? (
-        <div className="text-center">
+        <div className="p-4 text-center">
           <p>Loading...</p>
         </div>
       ) : (
-        <div>
+        <div className="p-4">
           {!hasClasses ? (
             <div className="text-center text-xl mt-10">No classes found</div>
           ) : (
@@ -246,110 +252,108 @@ const Home: React.FC = () => {
                 {getSortedDates(Object.keys(filteredData[studio])).map(
                   (date) => (
                     <div key={date} className="mb-6">
-                      <h3 className="text-xl font-semibold mb-2">{date}</h3>
                       {filteredData[studio][date] &&
-                      filteredData[studio][date].length > 0 ? (
-                        <div className="overflow-x-auto">
-                          <table
-                            className={`min-w-full ${
-                              isDarkMode
-                                ? "bg-gray-800 border-gray-600"
-                                : "bg-white border-gray-200"
-                            } rounded`}
-                          >
-                            <thead>
-                              <tr>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Session
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Instructor
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  Start Time
-                                </th>
-                                <th
-                                  className={`py-2 px-4 border-b ${
-                                    isDarkMode ? "text-white" : "text-black"
-                                  }`}
-                                >
-                                  End Time
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {sortSessionsByStartTime(
-                                filteredData[studio][date]
-                              ).map((session, index) => (
-                                <tr
-                                  key={index}
-                                  className={
-                                    isDarkMode
-                                      ? "hover:bg-gray-700"
-                                      : "hover:bg-gray-100"
-                                  }
-                                >
-                                  <td
+                        filteredData[studio][date].length > 0 && (
+                          <div className="overflow-x-auto">
+                            <h3 className="text-xl font-semibold mb-2">
+                              {date}
+                            </h3>
+                            <table
+                              className={`min-w-full ${
+                                isDarkMode
+                                  ? "bg-gray-800 border-gray-600"
+                                  : "bg-white border-gray-200"
+                              } rounded`}
+                            >
+                              <thead>
+                                <tr>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    <a
-                                      href={session.url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:underline"
-                                    >
-                                      {session.session_name}
-                                    </a>
-                                  </td>
-                                  <td
+                                    Session
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {session.instructor}
-                                  </td>
-                                  <td
+                                    Instructor
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {new Date(
-                                      session.start_time
-                                    ).toLocaleString()}
-                                  </td>
-                                  <td
+                                    Start Time
+                                  </th>
+                                  <th
                                     className={`py-2 px-4 border-b ${
                                       isDarkMode ? "text-white" : "text-black"
                                     }`}
                                   >
-                                    {new Date(
-                                      session.end_time
-                                    ).toLocaleString()}
-                                  </td>
+                                    End Time
+                                  </th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      ) : (
-                        <div className="text-center text-xl mt-10">
-                          No matching classes
-                        </div>
-                      )}
+                              </thead>
+                              <tbody>
+                                {sortSessionsByStartTime(
+                                  filteredData[studio][date]
+                                ).map((session, index) => (
+                                  <tr
+                                    key={index}
+                                    className={
+                                      isDarkMode
+                                        ? "hover:bg-gray-700"
+                                        : "hover:bg-gray-100"
+                                    }
+                                  >
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      <a
+                                        href={session.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:underline"
+                                      >
+                                        {session.session_name}
+                                      </a>
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {session.instructor}
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {new Date(
+                                        session.start_time
+                                      ).toLocaleString()}
+                                    </td>
+                                    <td
+                                      className={`py-2 px-4 border-b ${
+                                        isDarkMode ? "text-white" : "text-black"
+                                      }`}
+                                    >
+                                      {new Date(
+                                        session.end_time
+                                      ).toLocaleString()}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                     </div>
                   )
                 )}
