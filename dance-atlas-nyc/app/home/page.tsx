@@ -10,15 +10,20 @@ export default function Home() {
   const router = useRouter();
   const auth = getAuth();
   const [preferences, setPreferences] = useState("");
+  
 
   useEffect(() => {
     if (!loading && !user) {
+      console.log("user not logged in!");
       router.push("/login"); // Redirect to login if not logged in
     } else if (user) {
       // Fetch user preferences from Firestore
       fetch(`/api/preferences?uid=${user.uid}`)
         .then((res) => res.json())
         .then((data) => {
+          if ("error" in data) {
+            console.log("error recieved: ", data);
+          }
           setPreferences(data.preferences || "");
         });
     }
@@ -52,25 +57,31 @@ export default function Home() {
   }
 
   return (
-    <div className="p-4 min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-black dark:text-white">
-          My Preferences
-        </h1>
-        <div className="flex space-x-4">
-          <button
-            onClick={handleSearch}
-            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
-          >
-            Search
-          </button>
-          <button
-            onClick={handleLogout}
-            className="p-2 border border-gray-300 rounded bg-blue-600 text-white hover:bg-blue-700 transition duration-300"
-          >
-            Logout
-          </button>
-        </div>
+        <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
+          <div className="mb-2 flex flex-wrap items-center justify-between">
+            <div className="flex space-x-4">
+              <h1 className="text-2xl font-semibold text-black dark:text-white">
+                My Preferences
+              </h1>
+            </div>
+            <div className="flex space-x-4">
+              <button
+                onClick={handleSearch}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+              >
+                Search
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </header>
       </div>
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-xl mx-auto">
         <textarea
