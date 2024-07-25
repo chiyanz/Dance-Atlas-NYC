@@ -325,17 +325,24 @@ class StudioCrawler:
     def ildm_handler(self):
        dates = []
        wait = WebDriverWait(self.driver, 10)
-       dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
+       dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+       edt_timezone = ZoneInfo("America/New_York")
        available_dates = len(dates)
        for i in range(available_dates):
           day = dates[i]
+          print(f"ild day {day.text}")
           try:
              sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
              for session in sessions:
                 try:
                    session_starttime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_starttime')]").get_attribute('datetime')
-                   print(f"ildm_handler testing")
                    print(f"start time: {session_starttime}")
+
+                   info = {
+                      "start_time": session_starttime
+                   }
+
+                   self.data['ILDManhattan'].append(info)
                 except Exception as e:
                    print(f"Error processing day: {e}")
           except Exception as e:
