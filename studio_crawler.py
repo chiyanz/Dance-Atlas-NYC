@@ -330,16 +330,24 @@ class StudioCrawler:
        available_dates = len(dates)
        for i in range(available_dates):
           day = dates[i]
-          print(f"ild day {day.text}")
+          print(f"ild // day: {day.text}")
+          print(f"ild // end of this day\n")
           try:
              sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
              for session in sessions:
                 try:
                    session_starttime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_starttime')]").get_attribute('datetime')
-                   print(f"start time: {session_starttime}")
+                   session_endtime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_endtime')]").get_attribute('datetime')
+                   session_name = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__name')]").text
+                   session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
+                   url = self.driver.current_url
 
                    info = {
-                      "start_time": session_starttime
+                      "start_time": session_starttime,
+                      "end_time": session_endtime,
+                      "session_name": session_name,
+                      "instructor": session_staff,
+                      "url": url
                    }
 
                    self.data['ILDManhattan'].append(info)
