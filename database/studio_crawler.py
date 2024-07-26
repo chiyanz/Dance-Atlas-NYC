@@ -76,6 +76,8 @@ class StudioCrawler:
            self.bdc_handler()
         if studio_name == 'Brickhouse':
              self.brickhouse_handler()
+        if studio_name == 'ILDManhattan':
+           self.ildm_handler()
     
     def storeData(self):
        for studio, classes in self.data.items():
@@ -105,6 +107,7 @@ class StudioCrawler:
         try:
           wait = WebDriverWait(self.driver, 5)
           dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
+          print(dates)
         except Exception as e:
           print(e)
         # dates = self.driver.find_elements(By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")
@@ -318,6 +321,41 @@ class StudioCrawler:
         except Exception as e:
             print(f"Error processing day: {e}")
       return 
+    
+    def ildm_handler(self):
+       dates = []
+       wait = WebDriverWait(self.driver, 10)
+       dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+       edt_timezone = ZoneInfo("America/New_York")
+       available_dates = len(dates)
+       for i in range(available_dates):
+          day = dates[i]
+          print(f"ild // day: {day.text}")
+          print(f"ild // end of this day\n")
+          try:
+             sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
+             for session in sessions:
+                try:
+                   session_starttime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_starttime')]").get_attribute('datetime')
+                   session_endtime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_endtime')]").get_attribute('datetime')
+                   session_name = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__name')]").text
+                   session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
+                   url = self.driver.current_url
+
+                   info = {
+                      "start_time": session_starttime,
+                      "end_time": session_endtime,
+                      "session_name": session_name,
+                      "instructor": session_staff,
+                      "url": url
+                   }
+
+                   self.data['ILDManhattan'].append(info)
+                except Exception as e:
+                   print(f"Error processing day: {e}")
+          except Exception as e:
+             print(f"Error processing day: {e}")
+          return
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="A script to specify the environment as 'dev' or 'prod'")
@@ -333,7 +371,7 @@ if __name__ == "__main__":
   print(f"Mode: {mode}")
 
   # read config file
-  f = open("site_data.json")
+  f = open('site_data.json')
   config = json.load(f)
   studio_urls = config['urls']
 
