@@ -14,6 +14,7 @@ import re
 import argparse
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+import platform
 
 class StudioCrawler: 
     """
@@ -44,10 +45,18 @@ class StudioCrawler:
         options.add_argument("--ssl-protocol=any")
         user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
         options.add_argument(f'user-agent={user_agent}')
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=options)
+        driver_path = ChromeDriverManager().install()
+        if driver_path:
+            driver_name = driver_path.split('/')[-1]
+            if platform.system() == "Windows":
+                driver_path = "\\".join(driver_path.split('/')[:-1] + ["chromedriver.exe"])
+                os.chmod(driver_path, 0o755)
+
+            else:
+                driver_path = "/".join(driver_path.split('/')[:-1] + ["chromedriver"])
+                os.chmod(driver_path, 0o755)
+        driver = webdriver.Chrome(service=Service(driver_path), options=options)
         self.driver = driver
-        # self.driver = webdriver.Chrome(options=options)
         # self.driver.execute_script(self.javascript_code)
         self.studios = studios
         self.data = {name: [] for name, _ in studios.items()}
