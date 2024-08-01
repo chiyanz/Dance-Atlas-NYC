@@ -3,6 +3,7 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -79,16 +80,16 @@ def studio_crawler(request, mode="prod"):
             for studio_name, url in self.studios.items():
                 print(studio_name, url)
                 self.driver.get(url)
-                # if studio_name == 'Peri':
-                #    self.peri_handler()
-                # if studio_name == 'PMT':
-                #    self.pmt_handler()
-                # if studio_name == 'Modega':
-                #    self.modega_handler()
-                # if studio_name == 'BDC':
-                #    self.bdc_handler()
-                # if studio_name == 'Brickhouse':
-                    #  self.brickhouse_handler()
+                if studio_name == 'Peri':
+                   self.peri_handler()
+                if studio_name == 'PMT':
+                   self.pmt_handler()
+                if studio_name == 'Modega':
+                   self.modega_handler()
+                if studio_name == 'BDC':
+                   self.bdc_handler()
+                if studio_name == 'Brickhouse':
+                     self.brickhouse_handler()
                 if studio_name == 'ILoveDanceManhattan':
                     self.ildm_handler()
             
@@ -319,15 +320,30 @@ def studio_crawler(request, mode="prod"):
         
         def ildm_handler(self):
             wait = WebDriverWait(self.driver, 20)
+            dates = []
             try:
-                dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+                close_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@class='sqs-popup-overlay-close']")))
+                close_button.click()
+                print("Popup closed")
             except Exception as e:
-                print(f"Error locating date elements: {e}")
-                return
-            
+                print("No popup to close")
+
+            try:
+                class_container = wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='sqs-block-content']")))
+                print('content container located')
+                dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+            except TimeoutException:
+                print("Timed out waiting for calendar days to be visible. Refreshing the page.")
+                self.driver.refresh()
+                try:
+                    dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
+                except TimeoutException:
+                    print("Timed out again after refreshing. Exiting.")
+
             edt_timezone = ZoneInfo("America/New_York")
             available_dates = len(dates)
             for i in range(available_dates):
+                print(f"day {i} text: {dates[i].text}")
                 day = dates[i]
                 try:
                     sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
