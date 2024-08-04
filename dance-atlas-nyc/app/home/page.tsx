@@ -4,13 +4,35 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { getAuth, signOut } from "firebase/auth";
+import { type Preferences } from "@/types/preferenceSchema";
+
+const daysOfWeek = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+const studios = [
+  "Peridance Center",
+  "Broadway Dance Center",
+  "Modega",
+  "Brickhouse",
+];
 
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const auth = getAuth();
-  const [preferences, setPreferences] = useState("");
-  
+  const [preferences, setPreferences] = useState<Preferences>({
+    instructor: "",
+    style: "",
+    level: "",
+    dayOfWeek: "",
+    studio: "",
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -22,9 +44,11 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           if ("error" in data) {
-            console.log("error recieved: ", data);
+            console.log("error received: ", data);
           }
-          setPreferences(data.preferences || "");
+          if (data.preferences) {
+            setPreferences(data.preferences);
+          }
         });
     }
   }, [user, loading, router]);
@@ -50,6 +74,14 @@ export default function Home() {
 
   const handleSearch = () => {
     router.push("/classes");
+  };
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
+    setPreferences({ ...preferences, [e.target.name]: e.target.value });
   };
 
   if (loading) {
@@ -84,13 +116,58 @@ export default function Home() {
         </header>
       </div>
       <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-xl mx-auto">
-        <textarea
-          className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
-          value={preferences}
-          onChange={(e) => setPreferences(e.target.value)}
-          rows={6}
-          placeholder="Enter your class preferences here..."
-        />
+        <div className="space-y-4">
+          <input
+            type="text"
+            name="instructor"
+            value={preferences.instructor}
+            onChange={handleChange}
+            placeholder="Instructor"
+            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          />
+          <input
+            type="text"
+            name="style"
+            value={preferences.style}
+            onChange={handleChange}
+            placeholder="Style"
+            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          />
+          <input
+            type="text"
+            name="level"
+            value={preferences.level}
+            onChange={handleChange}
+            placeholder="Level"
+            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          />
+          <select
+            name="dayOfWeek"
+            value={preferences.dayOfWeek}
+            onChange={handleChange}
+            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          >
+            <option value="">Select Day of the Week</option>
+            {daysOfWeek.map((day) => (
+              <option key={day} value={day}>
+                {day}
+              </option>
+            ))}
+          </select>
+          <select
+            name="studio"
+            value={preferences.studio}
+            onChange={handleChange}
+            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+          >
+            <option value="">Select Studio</option>
+            {studios.map((studio) => (
+              <option key={studio} value={studio}>
+                {studio}
+              </option>
+            ))}
+          </select>
+        </div>
         <button
           onClick={handleSave}
           className="bg-blue-600 text-white py-3 mt-4 rounded-md hover:bg-blue-700 transition duration-300 w-full"

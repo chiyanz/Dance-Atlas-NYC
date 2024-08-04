@@ -13,7 +13,10 @@ This build uses chromedriver-win64 ver 120 compatible with Chrome 120.x versions
 1. Ensure Python3 and pip are installed
 2. Download all required dependencies by running ```pip install -r requirements.txt```
 3. Modify `site_data.json` to supplement information such as URLs and studio name
-4. Run `studio_crawler.py` for a pandas Dataframe to be generated and compiled class info to be written to terminal
+4. This script is currently being modified to more easily support command line development. For local testing, use google cloud `functions-frame` package:
+   1. Install using `pip install functions-framework`
+   2. Run `functions-framework --target=studio_crawler_entry_point` to expose the crawler on `localhost:8080` by default
+   3. Either access `http://localhost:8080/` or use `curl localhost:8080` to trigger the function for testing
 
 ### Contribution & Questions
 contact: jonathanqyz@gmail.com
