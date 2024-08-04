@@ -144,9 +144,9 @@ const Home: React.FC = () => {
       } min-h-screen w-full`}
     >
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
-        <div className="mb-2 flex flex-wrap items-center justify-between">
-          <div className="flex space-x-4">
-            <div>
+        <div className="mb-2 w-full flex items-center justify-between shrink">
+          <div className="flex space-x-2 shrink">
+            <div className="shrink">
               <select
                 onChange={(e) => setSelectedStudio(e.target.value)}
                 value={selectedStudio}
@@ -162,7 +162,7 @@ const Home: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="shrink">
               <select
                 onChange={(e) => setSelectedDate(e.target.value)}
                 value={selectedDate}
@@ -186,53 +186,47 @@ const Home: React.FC = () => {
                   ))}
               </select>
             </div>
-            <div className="flex items-center grow">
-              <select
-                onChange={(e) =>
-                  setSearchColumn(e.target.value as keyof SessionData)
-                }
-                value={searchColumn}
-                className={`border border-gray-300 rounded p-2 grow ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              >
-                <option value="session_name">Session Name</option>
-                <option value="instructor">Instructor</option>
-                <option value="start_time">Start Time</option>
-                <option value="end_time">End Time</option>
-              </select>
-              <input
-                type="text"
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  setSearchText(e.target.value);
-                }}
-                value={searchText}
-                placeholder="Search"
-                className={`border border-gray-300 rounded p-2 grow ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              />
-            </div>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex items-center shrink">
+            <select
+              onChange={(e) =>
+                setSearchColumn(e.target.value as keyof SessionData)
+              }
+              value={searchColumn}
+              className={`border border-gray-300 rounded p-2 ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="session_name">Session Name</option>
+              <option value="instructor">Instructor</option>
+              <option value="start_time">Start Time</option>
+              <option value="end_time">End Time</option>
+            </select>
+            <input
+              type="text"
+              onChange={(e) => {
+                console.log(e.target.value);
+                setSearchText(e.target.value);
+              }}
+              value={searchText}
+              placeholder="Search"
+              className={`border border-gray-300 rounded p-2 ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            />
+          </div>
+          <div className="flex space-x-2 shrink">
             <button
               onClick={handleHomeClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm shrink"
             >
               Home
             </button>
             <button
               onClick={handleLogoutClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm shrink"
             >
               Logout
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
-            >
-              Toggle Dark Mode
             </button>
           </div>
         </div>
