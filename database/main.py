@@ -38,11 +38,9 @@ def studio_crawler(request, mode="prod"):
         },
         });
         """
-        def __init__(self, studios = None, mode: str = "dev") -> None:
+        def __init__(self, studios, mode: str) -> None:
             options = webdriver.ChromeOptions()
-            # display the browser when we debug
-            if mode != "dev":
-                options.add_argument('--headless')
+            # options.add_argument('--headless=new')
             options.add_argument('--no-sandbox')  
             options.add_argument('--disable-dev-shm-usage')        
             options.add_argument("--ignore-certificate-errors")
@@ -51,16 +49,18 @@ def studio_crawler(request, mode="prod"):
             user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
             options.add_argument(f'user-agent={user_agent}')
             driver_path = ChromeDriverManager().install()
+            print("driver path: ", driver_path)
             if driver_path:
                 driver_name = driver_path.split('/')[-1]
                 if platform.system() == "Windows":
                     driver_path = "\\".join(driver_path.split('/')[:-1] + ["chromedriver.exe"])
                     os.chmod(driver_path, 0o755)
-
                 else:
                     driver_path = "/".join(driver_path.split('/')[:-1] + ["chromedriver"])
                     os.chmod(driver_path, 0o755)
+            print("driver path: ", driver_path)
             driver = webdriver.Chrome(service=Service(driver_path), options=options)
+            driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
             self.driver = driver
             # self.driver.execute_script(self.javascript_code)
             self.studios = studios
@@ -69,11 +69,24 @@ def studio_crawler(request, mode="prod"):
             self.mode = mode
 
         def main(self):
+
+            def custom_serializer(obj):
+                if isinstance(obj, datetime):
+                    return obj.isoformat()  # Convert datetime to ISO format string
+                raise TypeError(f"Type {type(obj)} not serializable")
+            
             self.crawlSessions()
+
             if self.mode == 'prod':  
                 self.storeData()
             else:
-                print(f'dev outputs:\n {self.data}')
+                devOutputFile = "dev_output.json"
+                try:
+                    with open(devOutputFile, 'w') as f:
+                        json.dump(self.data, f, default=custom_serializer)
+                        print(f'dev outputs written to: {devOutputFile}')
+                except Exception as e:
+                    print(f'error saving dev outputs: {e}')
             
 
         def crawlSessions(self):
@@ -185,6 +198,7 @@ def studio_crawler(request, mode="prod"):
                 except Exception as e:
                     print('encountered exception', e)
 
+        # TODO: add more navigation logic to also read next week
         def modega_handler(self):
             wait = WebDriverWait(self.driver, 20)
             dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//*[contains(@class, 'd-flex') and contains(@class, 'flex-column') and contains(@class, 'week-range__day') and not(contains(@class, 'week-range--disabled'))]")))
@@ -318,6 +332,7 @@ def studio_crawler(request, mode="prod"):
                     print(f"Error processing day: {e}")
             return 
         
+        # TODO: try to work around the JS shawdow dom/JS injection / whatever
         def ildm_handler(self):
             wait = WebDriverWait(self.driver, 20)
             dates = []
