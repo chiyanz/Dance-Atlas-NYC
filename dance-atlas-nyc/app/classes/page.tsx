@@ -19,6 +19,7 @@ const Home: React.FC = () => {
   const [searchColumn, setSearchColumn] =
     useState<keyof SessionData>("session_name");
   const [searchText, setSearchText] = useState<string>("");
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -143,49 +144,59 @@ const Home: React.FC = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
       } min-h-screen w-full`}
     >
-      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
-        <div className="mb-2 w-full flex items-center justify-between">
-          <div className="flex space-x-2 items-center">
-            <div className="shrink">
-              <select
-                onChange={(e) => setSelectedStudio(e.target.value)}
-                value={selectedStudio}
-                className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              >
-                <option value="">All Studios</option>
-                {Object.keys(data).map((studio) => (
-                  <option key={studio} value={studio}>
-                    {studio}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="shrink">
-              <select
-                onChange={(e) => setSelectedDate(e.target.value)}
-                value={selectedDate}
-                className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              >
-                <option value="">All Dates</option>
-                {Array.from(
-                  new Set(
-                    Object.keys(data).flatMap((studio) =>
-                      Object.keys(data[studio])
-                    )
+      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="text-xl md:hidden"
+          >
+            ☰
+          </button>
+        </div>
+        <div
+          className={`flex space-x-2 items-center ${
+            menuOpen ? "block" : "hidden"
+          } md:flex`}
+        >
+          <div className="shrink">
+            <select
+              onChange={(e) => setSelectedStudio(e.target.value)}
+              value={selectedStudio}
+              className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="">All Studios</option>
+              {Object.keys(data).map((studio) => (
+                <option key={studio} value={studio}>
+                  {studio}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="shrink">
+            <select
+              onChange={(e) => setSelectedDate(e.target.value)}
+              value={selectedDate}
+              className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="">All Dates</option>
+              {Array.from(
+                new Set(
+                  Object.keys(data).flatMap((studio) =>
+                    Object.keys(data[studio])
                   )
                 )
-                  .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-                  .map((date) => (
-                    <option key={date} value={date}>
-                      {date}
-                    </option>
-                  ))}
-              </select>
-            </div>
+              )
+                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+                .map((date) => (
+                  <option key={date} value={date}>
+                    {date}
+                  </option>
+                ))}
+            </select>
           </div>
           <div className="flex items-center">
             <select
@@ -215,20 +226,20 @@ const Home: React.FC = () => {
               }`}
             />
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={handleHomeClick}
-              className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
-            >
-              Home
-            </button>
-            <button
-              onClick={handleLogoutClick}
-              className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
-            >
-              Logout
-            </button>
-          </div>
+        </div>
+        <div className="space-x-2">
+          <button
+            onClick={handleHomeClick}
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
+          >
+            Home
+          </button>
+          <button
+            onClick={handleLogoutClick}
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
