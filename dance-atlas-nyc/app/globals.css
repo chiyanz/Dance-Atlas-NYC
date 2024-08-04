@@ -3,9 +3,44 @@
 @tailwind utilities;
 
 :root {
+  --font-size-small: 12px;
+  --font-size-medium: 14px;
+  --font-size-large: 16px;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --font-size-small: 14px;
+    --font-size-medium: 16px;
+    --font-size-large: 18px;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --font-size-small: 16px;
+    --font-size-medium: 18px;
+    --font-size-large: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --font-size-small: 18px;
+    --font-size-medium: 20px;
+    --font-size-large: 22px;
+  }
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --font-size-small: 20px;
+    --font-size-medium: 22px;
+    --font-size-large: 24px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

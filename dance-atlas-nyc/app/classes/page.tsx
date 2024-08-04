@@ -148,7 +148,7 @@ const Home: React.FC = () => {
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="text-xl md:hidden"
+            className="text-large md:hidden"
           >
             ☰
           </button>
@@ -250,22 +250,22 @@ const Home: React.FC = () => {
       ) : (
         <div className="p-4">
           {!hasClasses ? (
-            <div className="text-center text-xl mt-10">No classes found</div>
+            <div className="text-center text-large mt-10">No classes found</div>
           ) : (
             Object.keys(filteredData).map((studio) => (
               <div key={studio} className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">{studio}</h2>
+                <h2 className="text-xl font-bold mb-4">{studio}</h2>
                 {getSortedDates(Object.keys(filteredData[studio])).map(
                   (date) => (
                     <div key={date} className="mb-6">
                       {filteredData[studio][date] &&
                         filteredData[studio][date].length > 0 && (
                           <div className="overflow-x-auto">
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-medium font-semibold mb-2">
                               {date}
                             </h3>
                             <table
-                              className={`min-w-full ${
+                              className={`min-w-full text-small ${
                                 isDarkMode
                                   ? "bg-gray-800 border-gray-600"
                                   : "bg-white border-gray-200"
