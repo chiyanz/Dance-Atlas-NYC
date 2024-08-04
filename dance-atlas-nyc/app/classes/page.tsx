@@ -144,13 +144,13 @@ const Home: React.FC = () => {
       } min-h-screen w-full`}
     >
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
-        <div className="mb-2 w-full flex items-center justify-between shrink">
-          <div className="flex space-x-2 shrink">
+        <div className="mb-2 w-full flex items-center justify-between">
+          <div className="flex space-x-2 items-center">
             <div className="shrink">
               <select
                 onChange={(e) => setSelectedStudio(e.target.value)}
                 value={selectedStudio}
-                className={`border border-gray-300 rounded p-2 grow ${
+                className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
                   isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
                 }`}
               >
@@ -166,7 +166,7 @@ const Home: React.FC = () => {
               <select
                 onChange={(e) => setSelectedDate(e.target.value)}
                 value={selectedDate}
-                className={`border border-gray-300 rounded p-2 grow ${
+                className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
                   isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
                 }`}
               >
@@ -187,13 +187,13 @@ const Home: React.FC = () => {
               </select>
             </div>
           </div>
-          <div className="flex items-center shrink">
+          <div className="flex items-center">
             <select
               onChange={(e) =>
                 setSearchColumn(e.target.value as keyof SessionData)
               }
               value={searchColumn}
-              className={`border border-gray-300 rounded p-2 ${
+              className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             >
@@ -210,27 +210,28 @@ const Home: React.FC = () => {
               }}
               value={searchText}
               placeholder="Search"
-              className={`border border-gray-300 rounded p-2 ${
+              className={`border border-gray-300 rounded p-2 text-xs sm:text-sm md:text-base lg:text-base ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             />
           </div>
-          <div className="flex space-x-2 shrink">
+          <div className="flex space-x-2">
             <button
               onClick={handleHomeClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm shrink"
+              className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
             >
               Home
             </button>
             <button
               onClick={handleLogoutClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm shrink"
+              className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-xs sm:text-sm md:text-base lg:text-base"
             >
               Logout
             </button>
           </div>
         </div>
       </header>
+
       {loading ? (
         <div className="p-4 text-center">
           <p>Loading...</p>
