@@ -21,7 +21,6 @@ class ClassDatabase:
     self.classes_ref = db.collection('classes')
     today = datetime.today()
     self.today = today.strftime("%Y %m %d")
-    self.db = db
     self.data = {}
     # filter for only relevant classes that are in the future
     # store date in the format of:
@@ -29,10 +28,9 @@ class ClassDatabase:
     #   studio: {
     #     date: [classes]}
     # }
-    studios = self.classes_ref.stream()
-    results = {studio_name.id: {} for studio_name in studios}
-    print(results)
-    for studio in studios:
+    results = {}
+    for studio in self.classes_ref.stream():
+      results[studio.id] = {}
       print(studio.id)
       for date_ref in studio.collections():
         if date_ref.id >= self.today:
@@ -42,6 +40,8 @@ class ClassDatabase:
             print(session.to_dict())
 
     self.data = results 
+    self.db = db
+
     print(self.data)
 
    
