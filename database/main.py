@@ -40,7 +40,8 @@ def studio_crawler(request, mode="prod"):
         """
         def __init__(self, studios, mode: str) -> None:
             options = webdriver.ChromeOptions()
-            # options.add_argument('--headless=new')
+            if mode == 'prod':
+                options.add_argument('--headless=new')
             options.add_argument('--no-sandbox')  
             options.add_argument('--disable-dev-shm-usage')        
             options.add_argument("--ignore-certificate-errors")
@@ -399,4 +400,4 @@ def studio_crawler_entry_point(request):
     return studio_crawler(request)
 
 if __name__ == "__main__":
-    studio_crawler(None, "dev")
+    studio_crawler(None, "prod")
