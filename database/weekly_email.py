@@ -13,6 +13,37 @@ from firestore_util import Firebase
 from datetime import datetime
 import json 
 
+# helper functions
+def hasPreferences(obj) -> bool: 
+  if len(obj.items()) == 0:
+    return False 
+  for _, val in obj.items:
+    if len(val) > 0:
+      return True 
+  return False
+
+def get_day_of_week(date_str):
+  date_obj = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+  
+  day_of_week = date_obj.strftime('%A')
+  
+  return day_of_week
+
+def filter_classes(classes, preferences):
+  filtered_classes = []
+  
+  level = preferences.get('level', '').lower()
+  style = preferences.get('style', '').lower()
+  instructor = preferences.get('instructor', '').lower()
+  
+  for class_obj in classes:
+    class_description = class_obj.get('id').lower()
+    if class_obj.get('instructor', '').lower() == instructor:
+      if level in class_description and style in class_description:
+        filtered_classes.append(class_obj)
+  
+  return filtered_classes
+
 # class_db Class 
 # should contain all data
 # should include method for matching classes
@@ -39,7 +70,6 @@ class ClassDatabase:
             results[studio_name][coll.id] = []
             for doc in coll.stream():
               results[studio_name][coll.id].append(doc.to_dict())
-              print(doc.id)
     except Exception as e:
       # TODO: add better custom error message for class data receival
       raise e
@@ -47,7 +77,7 @@ class ClassDatabase:
     # get a list of all users
     users = []
     try:
-      for user_ref in db.collection('users'):
+      for user_ref in db.collection('users').stream():
         users.append(user_ref.to_dict())
     except Exception as e:
       raise e
@@ -55,10 +85,33 @@ class ClassDatabase:
     self.data = results 
     self.users = users 
     self.db = db
+    print(self.users)
 
   # TODO: first handle parsing preferences
   def getCustomizedNews(self):
-   return 
+   # TODO: generate a default list of classes
+   default_classes = []
+   user_emails = {} 
+   for user in self.users:
+     preferences = user.preferences
+     matching_classes = []
+     if hasPreferences(preferences): 
+        # TODO: improve filtering behavior
+        for studio, dates in self.data.items(): 
+          if preferences.studio and studio not in preferences.studio:
+            continue 
+          else: 
+            for date, classes in dates.items():
+              day = get_day_of_week(date)
+              if preferences.dayOfWeek and day not in preferences.dayOfWeek:
+                continue 
+              else: 
+                matching_classes = filter_classes(preferences, classes)
+                user_emails[user.email] = filter_classes
+
+     if not len(matching_classes):
+       user_emails[user.email] = default_classes 
+   self.user_emails = user_emails 
   
   # TODO: create a template for generating news emails given news
   # that a ACTIVE (non-opt-out) user is interested in (or default content)
@@ -72,5 +125,7 @@ class ClassDatabase:
     # finally send the emails 
     return 
   
+
+
 if __name__ == "__main__":
    classData = ClassDatabase()
