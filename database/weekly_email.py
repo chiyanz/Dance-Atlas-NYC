@@ -1,17 +1,17 @@
-# brain-storming
-# workflow structure
-"""
-1 - load all data during and after current day 
-2 - load all "active" users 
-3 - loop through the user database and narrow search by:
-  1 - filtering matching studios 
-  2 - filter for day (using day-of-week preference)
-  3 - filter for instructor
-"""
-
+from dotenv import load_dotenv
+load_dotenv()
+import os
 from firestore_util import Firebase
 from datetime import datetime
 import json 
+from email.message import EmailMessage
+import ssl
+import os
+import smtplib
+
+# gmail SMTP setup
+email_password = os.environ.get("app-password")
+email_sender = os.environ.get("app-email")
 
 # helper functions
 def hasPreferences(obj) -> bool: 
@@ -116,6 +116,7 @@ class ClassDatabase:
   # TODO: create a template for generating news emails given news
   # that a ACTIVE (non-opt-out) user is interested in (or default content)
   def constructEmail(self, data):
+
     return
   
   # TODO: send emails to active users
@@ -124,6 +125,8 @@ class ClassDatabase:
     # constructEmail will generate the raw content
     # finally send the emails 
     return 
+  
+  
   
 
 
