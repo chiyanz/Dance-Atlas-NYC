@@ -85,45 +85,78 @@ class ClassDatabase:
     self.data = results 
     self.users = users 
     self.db = db
-    print(self.users)
 
   # TODO: first handle parsing preferences
   def getCustomizedNews(self):
    # TODO: generate a default list of classes
-   default_classes = []
-   user_emails = {} 
-   for user in self.users:
-     preferences = user.preferences
-     matching_classes = []
-     if hasPreferences(preferences): 
-        # TODO: improve filtering behavior
-        for studio, dates in self.data.items(): 
-          if preferences.studio and studio not in preferences.studio:
-            continue 
-          else: 
-            for date, classes in dates.items():
-              day = get_day_of_week(date)
-              if preferences.dayOfWeek and day not in preferences.dayOfWeek:
-                continue 
-              else: 
-                matching_classes = filter_classes(preferences, classes)
-                user_emails[user.email] = filter_classes
-
-     if not len(matching_classes):
-       user_emails[user.email] = default_classes 
-   self.user_emails = user_emails 
+    user_emails = {} 
+    for user in self.users:
+      preferences = user.preferences
+      matching_classes = []
+      if hasPreferences(preferences): 
+          user_emails[user.email] = []
+          # TODO: improve filtering behavior
+          for studio, dates in self.data.items(): 
+            if preferences.studio and studio not in preferences.studio:
+              continue 
+            else: 
+              for date, classes in dates.items():
+                day = get_day_of_week(date)
+                if preferences.dayOfWeek and day not in preferences.dayOfWeek:
+                  continue 
+                else: 
+                  matching_classes = filter_classes(preferences, classes)
+                  user_emails[user.emmail].append(matching_classes)
+      # TODO: we should draft "default" emails for users with no preferences (and also use it if user had no matches)
+    self.user_email_classes = user_emails 
   
   # TODO: create a template for generating news emails given news
-  # that a ACTIVE (non-opt-out) user is interested in (or default content)
   def constructEmail(self, data):
+    content = 'Hello from Dance Atlas NYC! \n Here are upcoming class offerings in NYC studios that match your preferences: \n'
+    for details in data:
+      start_time = details['start_time']
+      end_time = details['end_time']
+      instructor = details.get('instructor', 'unknown instructor')
+      session_name = details.get('session_name', 'unknow dance class')
+      url = details.get('url', '')
+      location = details.get('location', 'unknown location')
 
-    return
+      # Formatting the start and end times to a more readable format
+      start_time_str = start_time.strftime('%A, %B %d, %Y at %I:%M %p')
+      end_time_str = end_time.strftime('%I:%M %p')
+
+      # Constructing the email text
+      email_text = f"""
+      Class Name: "{session_name}".
+      Instructor: {instructor}
+      Date and Time: {start_time_str} to {end_time_str}
+      Location: {location}
+
+      View more details or register for additional sessions here: {url}
+      """
+      content += email_text
+    content += '\n\nFor more info on upcoming classes go to: https://dance-atlas-nyc.vercel.app/ \n\n Happy dancing!'
+    return content 
   
   # TODO: send emails to active users
   def sendEmails(self):
     # getCustomizedNews will create personalized content
     # constructEmail will generate the raw content
     # finally send the emails 
+    context = ssl.create_default_context()
+    try: 
+      with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+        smtp.login(email_sender, email_password)
+        for user_email, user_classes in self.user_email_classes.items():
+          content = self.constructEmail(user_classes)
+          em = EmailMessage()
+          em['From'] = email_sender
+          em['To'] = user_email
+          em['Subject'] = '[Dance Atlas NYC] Your Weekly Class Update'
+          em.set_content(content)
+          smtp.sendmail(email_sender, user_email, em.as_string())
+    except Exception:
+      print('Error encountered while sending emails')
     return 
   
   
