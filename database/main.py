@@ -94,8 +94,8 @@ def studio_crawler(request, mode="prod"):
             for studio_name, url in self.studios.items():
                 print(studio_name, url)
                 self.driver.get(url)
-                if studio_name == 'Peri':
-                   self.peri_handler()
+                # if studio_name == 'Peri':
+                #    self.peri_handler()
                 if studio_name == 'PMT':
                    self.pmt_handler()
                 if studio_name == 'Modega':

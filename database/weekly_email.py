@@ -91,9 +91,10 @@ class ClassDatabase:
    # TODO: generate a default list of classes
     user_emails = {} 
     for user in self.users:
-      preferences = user.preferences
+      print(user.keys())
+      preferences =  user['preferences'] if hasattr(user, 'preferences') else None
       matching_classes = []
-      if hasPreferences(preferences): 
+      if preferences != None and hasPreferences(preferences): 
           user_emails[user.email] = []
           # TODO: improve filtering behavior
           for studio, dates in self.data.items(): 
@@ -108,6 +109,7 @@ class ClassDatabase:
                   matching_classes = filter_classes(preferences, classes)
                   user_emails[user.emmail].append(matching_classes)
       # TODO: we should draft "default" emails for users with no preferences (and also use it if user had no matches)
+    print(user_emails)
     self.user_email_classes = user_emails 
   
   # TODO: create a template for generating news emails given news
@@ -136,6 +138,7 @@ class ClassDatabase:
       """
       content += email_text
     content += '\n\nFor more info on upcoming classes go to: https://dance-atlas-nyc.vercel.app/ \n\n Happy dancing!'
+    print(f'content is: {content}')
     return content 
   
   # TODO: send emails to active users
@@ -159,9 +162,8 @@ class ClassDatabase:
       print('Error encountered while sending emails')
     return 
   
-  
-  
-
 
 if __name__ == "__main__":
    classData = ClassDatabase()
+   classData.getCustomizedNews()
+   classData.sendEmails()
