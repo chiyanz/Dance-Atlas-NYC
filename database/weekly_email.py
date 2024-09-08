@@ -91,7 +91,6 @@ class ClassDatabase:
    # TODO: generate a default list of classes
     user_emails = {} 
     for user in self.users:
-      print(user.keys())
       preferences =  user['preferences'] if hasattr(user, 'preferences') else None
       matching_classes = []
       if preferences != None and hasPreferences(preferences): 

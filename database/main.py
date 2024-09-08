@@ -94,8 +94,8 @@ def studio_crawler(request, mode="prod"):
             for studio_name, url in self.studios.items():
                 print(studio_name, url)
                 self.driver.get(url)
-                # if studio_name == 'Peri':
-                #    self.peri_handler()
+                if studio_name == 'Peri':
+                   self.peri_handler()
                 if studio_name == 'PMT':
                    self.pmt_handler()
                 if studio_name == 'Modega':
@@ -123,9 +123,11 @@ def studio_crawler(request, mode="prod"):
 
         def peri_handler(self):
             wait = WebDriverWait(self.driver, 20)
+            iframe = wait.until(EC.presence_of_element_located((By.XPATH, "//iframe")))
+            self.driver.switch_to.frame(iframe)
             dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
             available_dates = len(dates)
-
+            print(available_dates)
             for i in range(available_dates):
                 self.driver.implicitly_wait(10)
                 try:
@@ -400,4 +402,4 @@ def studio_crawler_entry_point(request):
     return studio_crawler(request)
 
 if __name__ == "__main__":
-    studio_crawler(None, "prod")
+    studio_crawler(None, "dev")
