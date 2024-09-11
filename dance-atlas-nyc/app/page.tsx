@@ -50,7 +50,7 @@ export default function Home() {
         >
           Search
         </button>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 p-8">
           Please note: Dance Atlas NYC is an independent, non-profit resource
           for the dance community and is not affiliated with any dance studios.
         </p>
