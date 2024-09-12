@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SessionData } from "../../types/dataSchema";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 interface OrganizedData {
   [studioName: string]: {
@@ -98,15 +100,6 @@ const Home: React.FC = () => {
     filterData();
   }, [data, selectedStudio, selectedDate, searchColumn, searchText]);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-    }
-  };
-
   const handleHomeClick = () => {
     router.push("/home");
   };
@@ -146,18 +139,13 @@ const Home: React.FC = () => {
     >
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
+          <FontAwesomeIcon
             className="text-large md:hidden"
-          >
-            ☰
-          </button>
+            onClick={() => setMenuOpen(!menuOpen)}
+            icon={faMagnifyingGlass}
+          />
         </div>
-        <div
-          className={`flex space-x-2 items-center ${
-            menuOpen ? "block" : "hidden"
-          } md:flex`}
-        >
+        <div className="space-x-2 hidden md:flex">
           <div className="shrink">
             <select
               onChange={(e) => setSelectedStudio(e.target.value)}
@@ -242,6 +230,98 @@ const Home: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* Overlay Sidebar Menu */}
+      {menuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex">
+          <div className="bg-white dark:bg-gray-800 w-72 p-6 shadow-lg flex flex-col space-y-6">
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="self-end text-xl font-bold"
+            >
+              &times;
+            </button>
+
+            {/* Improved Dropdowns and Input Fields */}
+            <div className="flex flex-col space-y-4">
+              <select
+                onChange={(e) => setSelectedStudio(e.target.value)}
+                value={selectedStudio}
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+              >
+                <option value="">All Studios</option>
+                {Object.keys(data).map((studio) => (
+                  <option key={studio} value={studio}>
+                    {studio}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                onChange={(e) => setSelectedDate(e.target.value)}
+                value={selectedDate}
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+              >
+                <option value="">All Dates</option>
+                {Array.from(
+                  new Set(
+                    Object.keys(data).flatMap((studio) =>
+                      Object.keys(data[studio])
+                    )
+                  )
+                )
+                  .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+                  .map((date) => (
+                    <option key={date} value={date}>
+                      {date}
+                    </option>
+                  ))}
+              </select>
+
+              {/* Supporting Text for Coupled Elements */}
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Search by:
+                </label>
+                <select
+                  onChange={(e) =>
+                    setSearchColumn(e.target.value as keyof SessionData)
+                  }
+                  value={searchColumn}
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                    isDarkMode
+                      ? "bg-gray-800 text-white"
+                      : "bg-white text-black"
+                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                >
+                  <option value="session_name">Session Name</option>
+                  <option value="instructor">Instructor</option>
+                  <option value="start_time">Start Time</option>
+                  <option value="end_time">End Time</option>
+                </select>
+                <input
+                  type="text"
+                  onChange={(e) => {
+                    console.log(e.target.value);
+                    setSearchText(e.target.value);
+                  }}
+                  value={searchText}
+                  placeholder="Search"
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                    isDarkMode
+                      ? "bg-gray-800 text-white"
+                      : "bg-white text-black"
+                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="p-4 text-center">

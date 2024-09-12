@@ -220,16 +220,11 @@ def studio_crawler(request, mode="prod"):
                     classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(concat(' ', normalize-space(@class), ' '), ' p-1 ') and contains(concat(' ', normalize-space(@class), ' '), ' card-body ')]")))
                     for session in classes:
                         class_time = session.find_element(By.XPATH, ".//p[contains(@class, 'dateTimeText') and contains(@class, 'card-text')]").text
-                        start_time_str = re.search(r"(\d+:\d+\s(?:AM|PM)\sPDT)", class_time).group(1)
-                        start_time = datetime.strptime(start_time_str, "%I:%M %p").replace(tzinfo=ZoneInfo("America/Los_Angeles"))
-                        # modega autometically displays time in local time zone, need to convert to EDT
-                        # Convert PDT time to EDT
-                        start_time = start_time.astimezone(ZoneInfo("America/New_York"))
-
+                        start_time_str = re.search(r"(\d+:\d+\s(?:AM|PM))", class_time).group(1)
+                        start_time = datetime.strptime(start_time_str, "%I:%M %p")
                         today = datetime.now().date()
                         start_time = datetime.combine(today, start_time.timetz())  + timedelta(days=i)
-
-                        # regex search for the duration to calculate end time
+                        start_time = start_time.replace(tzinfo=ZoneInfo("America/New_York"))
                         match = re.search(r"\((\d+) min\)", class_time)
                         if match:
                             duration = int(match.group(1))
@@ -253,7 +248,7 @@ def studio_crawler(request, mode="prod"):
                         }
                         self.data['Modega'].append(info)
                 except Exception as e:
-                    print(f'no classes found on day {i}')
+                    print(f'error getting classes for day {i}')
                     print(e)
             return
         
