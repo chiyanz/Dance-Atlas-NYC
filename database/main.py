@@ -40,8 +40,8 @@ def studio_crawler(request, mode="prod"):
         """
         def __init__(self, studios, mode: str) -> None:
             options = webdriver.ChromeOptions()
-            if mode == 'prod':
-                options.add_argument('--headless=new')
+            # due to iframes, we now need the browser for all runs
+            # options.add_argument('--headless=new')
             options.add_argument('--no-sandbox')  
             options.add_argument('--disable-dev-shm-usage')        
             options.add_argument("--ignore-certificate-errors")
@@ -123,9 +123,11 @@ def studio_crawler(request, mode="prod"):
 
         def peri_handler(self):
             wait = WebDriverWait(self.driver, 20)
+            iframe = wait.until(EC.presence_of_element_located((By.XPATH, "//iframe")))
+            self.driver.switch_to.frame(iframe)
             dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
             available_dates = len(dates)
-
+            print(available_dates)
             for i in range(available_dates):
                 self.driver.implicitly_wait(10)
                 try:
@@ -218,16 +220,11 @@ def studio_crawler(request, mode="prod"):
                     classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(concat(' ', normalize-space(@class), ' '), ' p-1 ') and contains(concat(' ', normalize-space(@class), ' '), ' card-body ')]")))
                     for session in classes:
                         class_time = session.find_element(By.XPATH, ".//p[contains(@class, 'dateTimeText') and contains(@class, 'card-text')]").text
-                        start_time_str = re.search(r"(\d+:\d+\s(?:AM|PM)\sPDT)", class_time).group(1)
-                        start_time = datetime.strptime(start_time_str, "%I:%M %p").replace(tzinfo=ZoneInfo("America/Los_Angeles"))
-                        # modega autometically displays time in local time zone, need to convert to EDT
-                        # Convert PDT time to EDT
-                        start_time = start_time.astimezone(ZoneInfo("America/New_York"))
-
+                        start_time_str = re.search(r"(\d+:\d+\s(?:AM|PM))", class_time).group(1)
+                        start_time = datetime.strptime(start_time_str, "%I:%M %p")
                         today = datetime.now().date()
                         start_time = datetime.combine(today, start_time.timetz())  + timedelta(days=i)
-
-                        # regex search for the duration to calculate end time
+                        start_time = start_time.replace(tzinfo=ZoneInfo("America/New_York"))
                         match = re.search(r"\((\d+) min\)", class_time)
                         if match:
                             duration = int(match.group(1))
@@ -251,7 +248,7 @@ def studio_crawler(request, mode="prod"):
                         }
                         self.data['Modega'].append(info)
                 except Exception as e:
-                    print(f'no classes found on day {i}')
+                    print(f'error getting classes for day {i}')
                     print(e)
             return
         
@@ -344,49 +341,40 @@ def studio_crawler(request, mode="prod"):
             except Exception as e:
                 print("No popup to close")
 
-            try:
-                class_container = wait.until(EC.visibility_of_element_located((By.XPATH, "//div[@class='sqs-block-content']")))
-                print('content container located')
-                dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
-            except TimeoutException:
-                print("Timed out waiting for calendar days to be visible. Refreshing the page.")
-                self.driver.refresh()
-                try:
-                    dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[contains(@class, 'bw-widget__day')]")))
-                except TimeoutException:
-                    print("Timed out again after refreshing. Exiting.")
-
-            edt_timezone = ZoneInfo("America/New_York")
+            dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
             available_dates = len(dates)
+            print(available_dates)
             for i in range(available_dates):
-                print(f"day {i} text: {dates[i].text}")
-                day = dates[i]
+                self.driver.implicitly_wait(10)
                 try:
-                    sessions = day.find_elements(By.XPATH, ".//div[contains(@class, 'bw-session__info')]")
-                    for session in sessions:
-                        try:
-                            print(session.text)
-                            session_starttime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_starttime')]").get_attribute('datetime')
-                            session_endtime = session.find_element(By.XPATH, ".//time[contains(@class, 'hc_endtime')]").get_attribute('datetime')
-                            session_starttime = datetime.fromisoformat(session_starttime).replace(tzinfo=edt_timezone)
-                            session_endtime = datetime.fromisoformat(session_endtime).replace(tzinfo=edt_timezone)
-                            session_name = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__name')]").text
-                            session_staff = session.find_element(By.XPATH, ".//div[contains(@class, 'bw-session__staff')]").text
-                            url = self.driver.current_url
+                    dates[i].click()
+                except:
+                    dates = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]")))
+                    dates[i].click()
+                print(f"day {i} clicked")
 
-                            info = {
-                                "start_time": session_starttime,
-                                "end_time": session_endtime,
-                                "session_name": session_name,
-                                "instructor": session_staff,
-                                "url": url
-                            }
-                            print(info)
-                            self.data['ILoveDanceManhattan'].append(info)
-                        except Exception as e:
-                            print(f"Error processing session: {e}")
+                try:
+                    classes = wait.until(EC.visibility_of_all_elements_located((By.XPATH, "//div[@class='bw-session']")))
+                    for session in classes:
+                        edt_timezone = ZoneInfo("America/New_York")
+                        start_time = session.find_element(By.XPATH, ".//time[@class='hc_starttime']").get_attribute('datetime')
+                        start_time = datetime.fromisoformat(start_time).replace(tzinfo=edt_timezone)
+                        end_time = session.find_element(By.XPATH, ".//time[@class='hc_endtime']").get_attribute('datetime')
+                        end_time = datetime.fromisoformat(end_time).replace(tzinfo=edt_timezone)
+                        session_name = session.find_element(By.XPATH, ".//div[@class='bw-session__name']").text
+                        instructor = session.find_element(By.XPATH, ".//div[@class='bw-session__staff']").text
+                        url = self.driver.current_url
+
+                        info = {
+                        'start_time': start_time,
+                        'end_time': end_time,
+                        'session_name': session_name,
+                        'instructor': instructor,
+                        'url': url
+                        }
+                        self.data['ILoveDanceManhattan'].append(info)
                 except Exception as e:
-                    print(f"Error processing day: {e}")
+                    print(f'no classes found on day {i}')
             return
 
         

@@ -10,3 +10,6 @@ __pycache__
 # crential files
 serviceAccountKey.json
 .env
+
+# dev outputs
+dev_output.json
