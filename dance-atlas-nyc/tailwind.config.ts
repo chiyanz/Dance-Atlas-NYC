@@ -14,6 +14,11 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      fontSize: {
+        small: "var(--font-size-small)",
+        medium: "var(--font-size-medium)",
+        large: "var(--font-size-large)",
+      },
     },
   },
   plugins: [],

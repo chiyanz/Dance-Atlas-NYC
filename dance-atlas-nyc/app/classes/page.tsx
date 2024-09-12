@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SessionData } from "../../types/dataSchema";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 interface OrganizedData {
   [studioName: string]: {
@@ -19,6 +21,7 @@ const Home: React.FC = () => {
   const [searchColumn, setSearchColumn] =
     useState<keyof SessionData>("session_name");
   const [searchText, setSearchText] = useState<string>("");
+  const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -97,15 +100,6 @@ const Home: React.FC = () => {
     filterData();
   }, [data, selectedStudio, selectedDate, searchColumn, searchText]);
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-    }
-  };
-
   const handleHomeClick = () => {
     router.push("/home");
   };
@@ -143,16 +137,119 @@ const Home: React.FC = () => {
         isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
       } min-h-screen w-full`}
     >
-      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
-        <div className="mb-2 flex flex-wrap items-center justify-between">
-          <div className="flex space-x-4">
-            <div>
+      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <FontAwesomeIcon
+            className="text-large md:hidden"
+            onClick={() => setMenuOpen(!menuOpen)}
+            icon={faMagnifyingGlass}
+          />
+        </div>
+        <div className="space-x-2 hidden md:flex">
+          <div className="shrink">
+            <select
+              onChange={(e) => setSelectedStudio(e.target.value)}
+              value={selectedStudio}
+              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="">All Studios</option>
+              {Object.keys(data).map((studio) => (
+                <option key={studio} value={studio}>
+                  {studio}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="shrink">
+            <select
+              onChange={(e) => setSelectedDate(e.target.value)}
+              value={selectedDate}
+              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="">All Dates</option>
+              {Array.from(
+                new Set(
+                  Object.keys(data).flatMap((studio) =>
+                    Object.keys(data[studio])
+                  )
+                )
+              )
+                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+                .map((date) => (
+                  <option key={date} value={date}>
+                    {date}
+                  </option>
+                ))}
+            </select>
+          </div>
+          <div className="flex items-center">
+            <select
+              onChange={(e) =>
+                setSearchColumn(e.target.value as keyof SessionData)
+              }
+              value={searchColumn}
+              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            >
+              <option value="session_name">Session Name</option>
+              <option value="instructor">Instructor</option>
+              <option value="start_time">Start Time</option>
+              <option value="end_time">End Time</option>
+            </select>
+            <input
+              type="text"
+              onChange={(e) => {
+                console.log(e.target.value);
+                setSearchText(e.target.value);
+              }}
+              value={searchText}
+              placeholder="Search"
+              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+              }`}
+            />
+          </div>
+        </div>
+        <div className="space-x-2">
+          <button
+            onClick={handleHomeClick}
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
+          >
+            Home
+          </button>
+          <button
+            onClick={handleLogoutClick}
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* Overlay Sidebar Menu */}
+      {menuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex">
+          <div className="bg-white dark:bg-gray-800 w-72 p-6 shadow-lg flex flex-col space-y-6">
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="self-end text-xl font-bold"
+            >
+              &times;
+            </button>
+
+            {/* Improved Dropdowns and Input Fields */}
+            <div className="flex flex-col space-y-4">
               <select
                 onChange={(e) => setSelectedStudio(e.target.value)}
                 value={selectedStudio}
-                className={`border border-gray-300 rounded p-2 grow ${
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
                   isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
+                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
               >
                 <option value="">All Studios</option>
                 {Object.keys(data).map((studio) => (
@@ -161,14 +258,13 @@ const Home: React.FC = () => {
                   </option>
                 ))}
               </select>
-            </div>
-            <div>
+
               <select
                 onChange={(e) => setSelectedDate(e.target.value)}
                 value={selectedDate}
-                className={`border border-gray-300 rounded p-2 grow ${
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
                   isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
+                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
               >
                 <option value="">All Dates</option>
                 {Array.from(
@@ -185,58 +281,48 @@ const Home: React.FC = () => {
                     </option>
                   ))}
               </select>
+
+              {/* Supporting Text for Coupled Elements */}
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Search by:
+                </label>
+                <select
+                  onChange={(e) =>
+                    setSearchColumn(e.target.value as keyof SessionData)
+                  }
+                  value={searchColumn}
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                    isDarkMode
+                      ? "bg-gray-800 text-white"
+                      : "bg-white text-black"
+                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                >
+                  <option value="session_name">Session Name</option>
+                  <option value="instructor">Instructor</option>
+                  <option value="start_time">Start Time</option>
+                  <option value="end_time">End Time</option>
+                </select>
+                <input
+                  type="text"
+                  onChange={(e) => {
+                    console.log(e.target.value);
+                    setSearchText(e.target.value);
+                  }}
+                  value={searchText}
+                  placeholder="Search"
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
+                    isDarkMode
+                      ? "bg-gray-800 text-white"
+                      : "bg-white text-black"
+                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                />
+              </div>
             </div>
-            <div className="flex items-center grow">
-              <select
-                onChange={(e) =>
-                  setSearchColumn(e.target.value as keyof SessionData)
-                }
-                value={searchColumn}
-                className={`border border-gray-300 rounded p-2 grow ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              >
-                <option value="session_name">Session Name</option>
-                <option value="instructor">Instructor</option>
-                <option value="start_time">Start Time</option>
-                <option value="end_time">End Time</option>
-              </select>
-              <input
-                type="text"
-                onChange={(e) => {
-                  console.log(e.target.value);
-                  setSearchText(e.target.value);
-                }}
-                value={searchText}
-                placeholder="Search"
-                className={`border border-gray-300 rounded p-2 grow ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                }`}
-              />
-            </div>
-          </div>
-          <div className="flex space-x-4">
-            <button
-              onClick={handleHomeClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-            >
-              Home
-            </button>
-            <button
-              onClick={handleLogoutClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-            >
-              Logout
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 border border-gray-300 rounded bg-gray-200 dark:bg-gray-700"
-            >
-              Toggle Dark Mode
-            </button>
           </div>
         </div>
-      </header>
+      )}
+
       {loading ? (
         <div className="p-4 text-center">
           <p>Loading...</p>
@@ -244,22 +330,22 @@ const Home: React.FC = () => {
       ) : (
         <div className="p-4">
           {!hasClasses ? (
-            <div className="text-center text-xl mt-10">No classes found</div>
+            <div className="text-center text-large mt-10">No classes found</div>
           ) : (
             Object.keys(filteredData).map((studio) => (
               <div key={studio} className="mb-8">
-                <h2 className="text-2xl font-bold mb-4">{studio}</h2>
+                <h2 className="text-large font-bold mb-4">{studio}</h2>
                 {getSortedDates(Object.keys(filteredData[studio])).map(
                   (date) => (
                     <div key={date} className="mb-6">
                       {filteredData[studio][date] &&
                         filteredData[studio][date].length > 0 && (
                           <div className="overflow-x-auto">
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-medium font-semibold mb-2">
                               {date}
                             </h3>
                             <table
-                              className={`min-w-full ${
+                              className={`min-w-full text-small ${
                                 isDarkMode
                                   ? "bg-gray-800 border-gray-600"
                                   : "bg-white border-gray-200"
