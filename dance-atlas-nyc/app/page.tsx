@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
+// import Image from 'next/image';
 
 // This page is meant to be the root landing page that can demo what the database is capable of
 // Optionally include a video of how to utilize it and its features
@@ -41,6 +42,7 @@ export default function Home() {
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center text-center">
+      <div style={{ backgroundImage: `url(${"images/aditya-ali-4nBxxvQyi4M-unsplash.jpg"})`, backgroundSize: 'cover' }}>
         <h2 className="text-3xl font-semibold mb-6">
           Discover Dance Classes and Events in NYC
         </h2>
@@ -54,6 +56,7 @@ export default function Home() {
           Please note: Dance Atlas NYC is an independent, non-profit resource
           for the dance community and is not affiliated with any dance studios.
         </p>
+        </div>
       </main>
 
       <footer className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">

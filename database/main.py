@@ -60,6 +60,7 @@ def studio_crawler(request, mode="prod"):
                 else:
                     driver_path = "/".join(driver_path.split('/')[:-1] + ["chromedriver"])
                     os.chmod(driver_path, 0o755)
+            print(driver_path)
             driver = webdriver.Chrome(service=Service(driver_path), options=options)
             self.driver = driver
             # self.driver.execute_script(self.javascript_code)
