@@ -6,6 +6,7 @@ import { getAuth, signInWithCustomToken } from "firebase/auth";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { resolve } from "path";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,10 +30,13 @@ export default function Login() {
     if (res.ok) {
       try {
         await signInWithCustomToken(auth, data.token);
-        console.log("signed in successfully!");
+        setMessage("Signed in successfully! Redirecting...");
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
         router.push("/classes");
       } catch (error) {
-        setMessage("Failed to sign in with custom token.");
+        setMessage("Sign in failed ;-;");
       }
     } else {
       setMessage(data.message || data.error);
