@@ -19,7 +19,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-black text-black dark:text-white">
+    <div className="flex flex-col min-h-screen bg-black dark:bg-black text-black dark:text-white">
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Dance Atlas NYC</h1>
@@ -41,8 +41,7 @@ export default function Home() {
       </header>
 
       <main className="flex flex-1 flex-col items-center justify-center text-center bg-home bg-cover bg-center">
-        <div className="bg-gray-50 bg-opacity-85 p-4">
-        <h2 className="text-4xl font-semibold mb-6">
+        <h2 className="text-4xl font-semibold mb-6 text-white">
           Discover Dance Classes and Events in NYC
         </h2>
         <button
@@ -51,11 +50,10 @@ export default function Home() {
         >
           Search
         </button>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+        <p className="text-sm text-gray-200 dark:text-gray-400 mt-4">
           Please note: Dance Atlas NYC is an independent, non-profit resource
           for the dance community and is not affiliated with any dance studios.
         </p>
-        </div>
       </main>
 
       <footer className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">

@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
-        'home': "url('../public/diane-picchiottino-TCjxx9NyONs-unsplash.jpg')",
+        'home': "url('../public/minimalist_studio_dark_cropped.png')",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
