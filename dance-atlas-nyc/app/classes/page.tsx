@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { SessionData } from "../../types/dataSchema";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
 
 interface OrganizedData {
   [studioName: string]: {
@@ -140,7 +141,7 @@ const Home: React.FC = () => {
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <FontAwesomeIcon
-            className="text-large md:hidden"
+            className="text-md md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             icon={faMagnifyingGlass}
           />
@@ -150,7 +151,7 @@ const Home: React.FC = () => {
             <select
               onChange={(e) => setSelectedStudio(e.target.value)}
               value={selectedStudio}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+              className={`border border-gray-300 rounded p-2 text-sm ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             >
@@ -166,7 +167,7 @@ const Home: React.FC = () => {
             <select
               onChange={(e) => setSelectedDate(e.target.value)}
               value={selectedDate}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+              className={`border border-gray-300 rounded p-2 text-sm ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             >
@@ -192,7 +193,7 @@ const Home: React.FC = () => {
                 setSearchColumn(e.target.value as keyof SessionData)
               }
               value={searchColumn}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+              className={`border border-gray-300 rounded p-2 text-sm ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             >
@@ -209,7 +210,7 @@ const Home: React.FC = () => {
               }}
               value={searchText}
               placeholder="Search"
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
+              className={`border border-gray-300 rounded p-2 text-sm ${
                 isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
               }`}
             />
@@ -218,13 +219,13 @@ const Home: React.FC = () => {
         <div className="space-x-2">
           <button
             onClick={handleHomeClick}
-            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base focus:ring-4"
           >
             Home
           </button>
           <button
             onClick={handleLogoutClick}
-            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
+            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base focus:ring-4"
           >
             Logout
           </button>
@@ -341,11 +342,11 @@ const Home: React.FC = () => {
                       {filteredData[studio][date] &&
                         filteredData[studio][date].length > 0 && (
                           <div className="overflow-x-auto">
-                            <h3 className="text-medium font-semibold mb-2">
+                            <h3 className="text-xl font-semibold mb-2">
                               {date}
                             </h3>
                             <table
-                              className={`min-w-full text-small ${
+                              className={`min-w-full text-md ${
                                 isDarkMode
                                   ? "bg-gray-800 border-gray-600"
                                   : "bg-white border-gray-200"
@@ -396,7 +397,7 @@ const Home: React.FC = () => {
                                     }
                                   >
                                     <td
-                                      className={`py-2 px-4 border-b ${
+                                      className={`py-2 px-4 border-b text-base ${
                                         isDarkMode ? "text-white" : "text-black"
                                       }`}
                                     >
@@ -410,29 +411,29 @@ const Home: React.FC = () => {
                                       </a>
                                     </td>
                                     <td
-                                      className={`py-2 px-4 border-b ${
+                                      className={`py-2 px-4 border-b text-base ${
                                         isDarkMode ? "text-white" : "text-black"
                                       }`}
                                     >
                                       {session.instructor}
                                     </td>
                                     <td
-                                      className={`py-2 px-4 border-b ${
+                                      className={`py-2 px-4 border-b text-base ${
                                         isDarkMode ? "text-white" : "text-black"
                                       }`}
                                     >
                                       {new Date(
                                         session.start_time
-                                      ).toLocaleString()}
+                                      ).toLocaleString('en-US', {timeStyle: 'short'})}
                                     </td>
                                     <td
-                                      className={`py-2 px-4 border-b ${
+                                      className={`py-2 px-4 border-b text-base ${
                                         isDarkMode ? "text-white" : "text-black"
                                       }`}
                                     >
                                       {new Date(
                                         session.end_time
-                                      ).toLocaleString()}
+                                      ).toLocaleString('en-US', {timeStyle: 'short'})}
                                     </td>
                                   </tr>
                                 ))}

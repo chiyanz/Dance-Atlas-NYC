@@ -10,6 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       backgroundImage: {
+        'home': "url('../public/minimalist_studio_dark_cropped.png')",
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
@@ -18,6 +19,10 @@ const config: Config = {
         small: "var(--font-size-small)",
         medium: "var(--font-size-medium)",
         large: "var(--font-size-large)",
+      },
+      fontFamily: {
+        'sans': ['"Segoe UI"'],
+        'body': ['"Open Sans"'],
       },
     },
   },
