@@ -1,13 +1,7 @@
-import {
-  initializeApp,
-  applicationDefault,
-  cert,
-  getApps,
-} from "firebase-admin/app";
+import { initializeApp, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { type ServiceAccount, credential } from "firebase-admin";
 import { getFirestore } from "firebase-admin/firestore";
-import path from "path";
 
 const getEnvVar = (key: string) => {
   const value = process.env[key];

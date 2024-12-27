@@ -10,8 +10,18 @@ This build uses chromedriver-win64 ver 120 compatible with Chrome 120.x versions
 - Implement crawling strategy for studio rental availability
 
 ### Usage
+#### Setup with uv
+Usage of `uv` to install project dependencies is recommended. 
+To setup your project with `uv`:
+1. run `uv venv` to setup your virtual environment.
+2. run `source .venv/bin/activate` to activate the created virutal environment.
+3. run `uv pip install -r requirements.txt` to install the necessary python dependencies.
+
+#### Setup with pip
 1. Ensure Python3 and pip are installed
 2. Download all required dependencies by running ```pip install -r requirements.txt```
+
+#### Running locally
 3. Modify `site_data.json` to supplement information such as URLs and studio name
 4. This script is currently being modified to more easily support command line development. For local testing, use google cloud `functions-frame` package:
    1. Install using `pip install functions-framework`
