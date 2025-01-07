@@ -9,11 +9,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import json
-import os
 import re
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-import platform
 
 
 class StudioCrawler:
@@ -87,13 +85,13 @@ class StudioCrawler:
                     studio_ref.collection(date).document(id).set(c)
                 except Exception as e:
                     print(e)
-                    print("error parsing stored data")
+                    print(f"error storing data for studio:  {studio}\nentry: {c}")
 
     def popup_recovery(self, button_xpath: str = ".//div[contains(@class, 'close')]"):
         self.driver.switch_to.parent_frame()
         try:
-            close_button = WebDriverWait(self.driver, 5).until(
-                EC.presence_of_element_located((By.XPATH, button_xpath))
+            close_button = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, button_xpath))
             )
             print("Popup element found. Attempting to close.")
             close_button.click()
@@ -486,21 +484,10 @@ class StudioCrawler:
                 print(f"Error processing day: {e}")
         return
 
-    # TODO: try to work around the JS shawdow dom/JS injection / whatever
     def ildm_handler(self):
         wait = WebDriverWait(self.driver, 20)
         dates = []
-        try:
-            close_button = wait.until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "//a[@class='sqs-popup-overlay-close']")
-                )
-            )
-            close_button.click()
-            print("Popup closed")
-        except Exception as e:
-            print("No popup to close")
-
+        self.popup_recovery("//a[@class='sqs-popup-overlay-close']")
         dates = wait.until(
             EC.visibility_of_all_elements_located(
                 (
@@ -510,23 +497,7 @@ class StudioCrawler:
             )
         )
         available_dates = len(dates)
-        print(available_dates)
         for i in range(available_dates):
-            self.driver.implicitly_wait(10)
-            try:
-                dates[i].click()
-            except:
-                dates = wait.until(
-                    EC.visibility_of_all_elements_located(
-                        (
-                            By.XPATH,
-                            "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]",
-                        )
-                    )
-                )
-                dates[i].click()
-            print(f"day {i} clicked")
-
             try:
                 classes = wait.until(
                     EC.visibility_of_all_elements_located(
@@ -568,7 +539,7 @@ class StudioCrawler:
         return
 
 
-def studio_crawler(request, mode="dev"):
+def studio_crawler(mode="dev"):
 
     f = open("site_data.json")
     config = json.load(f)
@@ -578,4 +549,4 @@ def studio_crawler(request, mode="dev"):
 
 
 if __name__ == "__main__":
-    studio_crawler(None, "prod")
+    studio_crawler()
