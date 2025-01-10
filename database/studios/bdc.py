@@ -1,6 +1,5 @@
-from database.studios.base_studio_handler import BaseStudioHandler
+from studios.base_studio_handler import BaseStudioHandler
 from zoneinfo import ZoneInfo
-from database.studios.base_studio_handler import BaseStudioHandler
 from selenium.webdriver.common.by import By
 from datetime import datetime
 
@@ -15,8 +14,8 @@ all classes are displayed on a single page, no navigation is needed
 
 
 class BDCCrawler(BaseStudioHandler):
-    def __init__(self, driver):
-        super().__init__(driver)
+    def __init__(self, driver, url):
+        super().__init__(driver, url)
 
     def crawl(self):
         dates = self.wait_for_all_visible("//div[contains(@class, 'bw-widget__day')]")
@@ -70,7 +69,7 @@ class BDCCrawler(BaseStudioHandler):
                             "location": session_location,
                             "url": url,
                         }
-                        self.data["BDC"].append(info)
+                        self.data.append(info)
                     except Exception as e:
                         print(f"Error processing session: {e}")
             except Exception as e:

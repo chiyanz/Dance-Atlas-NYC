@@ -1,5 +1,5 @@
+from studios.base_studio_handler import BaseStudioHandler
 from zoneinfo import ZoneInfo
-from database.studios.base_studio_handler import BaseStudioHandler
 from selenium.webdriver.common.by import By
 from datetime import datetime
 
@@ -15,10 +15,12 @@ a monthly calendar is displayed, clicking on a date shows classes only for that 
 
 
 class PeriDanceCrawler(BaseStudioHandler):
-    def __init__(self, driver):
-        super().__init__(driver)
+    def __init__(self, driver, url):
+        super().__init__(driver, url)
 
     def crawl(self):
+        self.driver.get(self.url)
+
         def close_popup_and_switch():
             self.popup_recovery(
                 ".//div[contains(@class, 'wixui-lightbox__close-button')]"

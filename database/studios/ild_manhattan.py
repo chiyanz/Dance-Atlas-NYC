@@ -1,6 +1,5 @@
-from database.studios.base_studio_handler import BaseStudioHandler
+from studios.base_studio_handler import BaseStudioHandler
 from zoneinfo import ZoneInfo
-from database.studios.base_studio_handler import BaseStudioHandler
 from selenium.webdriver.common.by import By
 from datetime import datetime
 
@@ -15,8 +14,8 @@ all classes for the next week are displayed on a single page, no navigation is n
 
 
 class ILDManhattanCrawler(BaseStudioHandler):
-    def __init__(self, driver):
-        super().__init__(driver)
+    def __init__(self, driver, url):
+        super().__init__(driver, url)
 
     def crawl(self):
         self.popup_recovery("//a[@class='sqs-popup-overlay-close']")
@@ -63,6 +62,6 @@ class ILDManhattanCrawler(BaseStudioHandler):
                         "instructor": instructor,
                         "url": url,
                     }
-                    self.data["ILoveDanceManhattan"].append(info)
+                    self.data.append(info)
             except Exception as e:
                 print(f"errored parsing day {i}: {e}")

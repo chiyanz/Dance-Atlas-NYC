@@ -1,13 +1,20 @@
+from selenium.webdriver.remote.webdriver import WebDriver
+from typing import List
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+"""
+Base studio crawler class with common helper function used to navigate the site and scrap content
+"""
+
 
 class BaseStudioHandler:
-    def __init__(self, driver):
+    def __init__(self, driver: WebDriver, url: str):
         self.driver = driver
-        self.data = []
+        self.url = url
+        self.data: List = []
 
     def close_popups(
         self, button_xpath: str = ".//div[contains(@class, 'close')]", timeout=10
@@ -34,3 +41,6 @@ class BaseStudioHandler:
     def wait_for_presence(self, xpath, timeout=20):
         wait = WebDriverWait(self.driver, timeout)
         return wait.until(EC.presence_of_element_located((By.XPATH, xpath)))
+
+    def crawl(self) -> None:
+        raise NotImplementedError("Subclasses must implement the `crawl` method.")

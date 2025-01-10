@@ -1,6 +1,5 @@
-from database.studios.base_studio_handler import BaseStudioHandler
+from studios.base_studio_handler import BaseStudioHandler
 from zoneinfo import ZoneInfo
-from database.studios.base_studio_handler import BaseStudioHandler
 from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
 import re
@@ -16,9 +15,9 @@ calendar is displayed for the current week, viewing next week's schedule requrie
 """
 
 
-class PeriDanceCrawler(BaseStudioHandler):
-    def __init__(self, driver):
-        super().__init__(driver)
+class ModegaCrawler(BaseStudioHandler):
+    def __init__(self, driver, url):
+        super().__init__(driver, url)
 
     def crawl(self):
         dates = self.wait_for_all_visible(
