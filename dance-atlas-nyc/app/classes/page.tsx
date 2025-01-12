@@ -4,6 +4,13 @@ import { useRouter } from "next/navigation";
 import { SessionData } from "../../types/dataSchema";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { NavButton } from "ui/Buttons";
+import HomeIcon from "@mui/icons-material/Home";
+import { useAuth } from "context/AuthContext";
+import { Logout } from "@mui/icons-material";
+import { Toolbar, AppBar, Button, IconButton } from "@mui/material";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface OrganizedData {
   [studioName: string]: {
@@ -12,12 +19,12 @@ interface OrganizedData {
 }
 
 const Home: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
   const [data, setData] = useState<OrganizedData>({});
   const [filteredData, setFilteredData] = useState<OrganizedData>({});
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedStudio, setSelectedStudio] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
   const [searchColumn, setSearchColumn] =
     useState<keyof SessionData>("session_name");
   const [searchText, setSearchText] = useState<string>("");
@@ -101,7 +108,9 @@ const Home: React.FC = () => {
   }, [data, selectedStudio, selectedDate, searchColumn, searchText]);
 
   const handleHomeClick = () => {
-    router.push("/home");
+    if (!authLoading && !user) {
+      router.push("/login");
+    } else router.push("/home");
   };
 
   const handleLogoutClick = async () => {
@@ -132,124 +141,130 @@ const Home: React.FC = () => {
   };
 
   return (
-    <div
-      className={`${
-        isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      } min-h-screen w-full`}
-    >
-      <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <FontAwesomeIcon
-            className="text-large md:hidden"
+    <div className={"min-h-screen w-full"}>
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: "gray.100",
+          boxShadow: 3,
+          width: "100%",
+          "&.MuiAppBar-root": {
+            backgroundColor: "background.default", // You can use theme for dark mode
+          },
+          flex: "row",
+        }}
+      >
+        <Toolbar
+          sx={{ display: "flex", justifyContent: "space-between", padding: 2 }}
+        >
+          <IconButton
             onClick={() => setMenuOpen(!menuOpen)}
-            icon={faMagnifyingGlass}
-          />
-        </div>
-        <div className="space-x-2 hidden md:flex">
-          <div className="shrink">
-            <select
-              onChange={(e) => setSelectedStudio(e.target.value)}
-              value={selectedStudio}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Studios</option>
-              {Object.keys(data).map((studio) => (
-                <option key={studio} value={studio}>
-                  {studio}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="shrink">
-            <select
-              onChange={(e) => setSelectedDate(e.target.value)}
-              value={selectedDate}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="">All Dates</option>
-              {Array.from(
-                new Set(
-                  Object.keys(data).flatMap((studio) =>
-                    Object.keys(data[studio])
-                  )
-                )
-              )
-                .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-                .map((date) => (
-                  <option key={date} value={date}>
-                    {date}
+            sx={{ borderRadius: "4px" }}
+          >
+            <ManageSearchIcon />
+          </IconButton>
+          <div className="space-x-2 hidden md:flex">
+            <div className="shrink">
+              <select
+                onChange={(e) => setSelectedStudio(e.target.value)}
+                value={selectedStudio}
+                className={
+                  "border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base"
+                }
+              >
+                <option value="">All Studios</option>
+                {Object.keys(data).map((studio) => (
+                  <option key={studio} value={studio}>
+                    {studio}
                   </option>
                 ))}
-            </select>
+              </select>
+            </div>
+            <div className="shrink">
+              <select
+                onChange={(e) => setSelectedDate(e.target.value)}
+                value={selectedDate}
+                className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base`}
+              >
+                <option value="">All Dates</option>
+                {Array.from(
+                  new Set(
+                    Object.keys(data).flatMap((studio) =>
+                      Object.keys(data[studio])
+                    )
+                  )
+                )
+                  .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+                  .map((date) => (
+                    <option key={date} value={date}>
+                      {date}
+                    </option>
+                  ))}
+              </select>
+            </div>
+            <div className="flex items-center">
+              <select
+                onChange={(e) =>
+                  setSearchColumn(e.target.value as keyof SessionData)
+                }
+                value={searchColumn}
+                className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base`}
+              >
+                <option value="session_name">Session Name</option>
+                <option value="instructor">Instructor</option>
+                <option value="start_time">Start Time</option>
+                <option value="end_time">End Time</option>
+              </select>
+              <input
+                type="text"
+                onChange={(e) => {
+                  console.log(e.target.value);
+                  setSearchText(e.target.value);
+                }}
+                value={searchText}
+                placeholder="Search"
+                className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base`}
+              />
+            </div>
           </div>
-          <div className="flex items-center">
-            <select
-              onChange={(e) =>
-                setSearchColumn(e.target.value as keyof SessionData)
-              }
-              value={searchColumn}
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
-            >
-              <option value="session_name">Session Name</option>
-              <option value="instructor">Instructor</option>
-              <option value="start_time">Start Time</option>
-              <option value="end_time">End Time</option>
-            </select>
-            <input
-              type="text"
-              onChange={(e) => {
-                console.log(e.target.value);
-                setSearchText(e.target.value);
-              }}
-              value={searchText}
-              placeholder="Search"
-              className={`border border-gray-300 rounded p-2 text-medium sm:text-sm md:text-base lg:text-base ${
-                isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
+          <div className="space-x-2">
+            <NavButton
+              name="Home"
+              icon={<HomeIcon />}
+              onClick={handleHomeClick}
             />
+            <NavButton
+              name="Logout"
+              icon={<Logout />}
+              onClick={handleLogoutClick}
+            ></NavButton>
           </div>
-        </div>
-        <div className="space-x-2">
-          <button
-            onClick={handleHomeClick}
-            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
-          >
-            Home
-          </button>
-          <button
-            onClick={handleLogoutClick}
-            className="px-2 py-1 sm:px-3 sm:py-2 bg-blue-500 text-white rounded-md text-medium sm:text-sm md:text-base lg:text-base"
-          >
-            Logout
-          </button>
-        </div>
-      </header>
+        </Toolbar>
+      </AppBar>
 
       {/* Overlay Sidebar Menu */}
       {menuOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex">
           <div className="bg-white dark:bg-gray-800 w-72 p-6 shadow-lg flex flex-col space-y-6">
-            <button
+            <IconButton
+              sx={{
+                width: "auto",
+                alignSelf: "flex-start",
+                alignContent: "center",
+                padding: "8px 8px",
+                //override IconButton's default round border
+                borderRadius: "4px",
+              }}
               onClick={() => setMenuOpen(false)}
-              className="self-end text-xl font-bold"
             >
-              &times;
-            </button>
-
+              <CloseIcon />
+            </IconButton>
             {/* Improved Dropdowns and Input Fields */}
             <div className="flex flex-col space-y-4">
               <select
                 onChange={(e) => setSelectedStudio(e.target.value)}
                 value={selectedStudio}
-                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none`}
               >
                 <option value="">All Studios</option>
                 {Object.keys(data).map((studio) => (
@@ -262,9 +277,7 @@ const Home: React.FC = () => {
               <select
                 onChange={(e) => setSelectedDate(e.target.value)}
                 value={selectedDate}
-                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
-                  isDarkMode ? "bg-gray-800 text-white" : "bg-white text-black"
-                } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none`}
               >
                 <option value="">All Dates</option>
                 {Array.from(
@@ -292,11 +305,7 @@ const Home: React.FC = () => {
                     setSearchColumn(e.target.value as keyof SessionData)
                   }
                   value={searchColumn}
-                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
-                    isDarkMode
-                      ? "bg-gray-800 text-white"
-                      : "bg-white text-black"
-                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                 >
                   <option value="session_name">Session Name</option>
                   <option value="instructor">Instructor</option>
@@ -311,11 +320,7 @@ const Home: React.FC = () => {
                   }}
                   value={searchText}
                   placeholder="Search"
-                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base ${
-                    isDarkMode
-                      ? "bg-gray-800 text-white"
-                      : "bg-white text-black"
-                  } focus:ring-2 focus:ring-blue-500 focus:outline-none`}
+                  className={`w-full border border-gray-300 rounded p-3 text-medium sm:text-sm md:text-base lg:text-base focus:ring-2 focus:ring-blue-500 focus:outline-none`}
                 />
               </div>
             </div>
@@ -344,41 +349,19 @@ const Home: React.FC = () => {
                             <h3 className="text-medium font-semibold mb-2">
                               {date}
                             </h3>
-                            <table
-                              className={`min-w-full text-small ${
-                                isDarkMode
-                                  ? "bg-gray-800 border-gray-600"
-                                  : "bg-white border-gray-200"
-                              } rounded`}
-                            >
+                            <table className={`min-w-full text-small rounded`}>
                               <thead>
                                 <tr>
-                                  <th
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
+                                  <th className={`py-2 px-4 border-b`}>
                                     Session
                                   </th>
-                                  <th
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
+                                  <th className={`py-2 px-4 border-b`}>
                                     Instructor
                                   </th>
-                                  <th
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
+                                  <th className={`py-2 px-4 border-b`}>
                                     Start Time
                                   </th>
-                                  <th
-                                    className={`py-2 px-4 border-b ${
-                                      isDarkMode ? "text-white" : "text-black"
-                                    }`}
-                                  >
+                                  <th className={`py-2 px-4 border-b`}>
                                     End Time
                                   </th>
                                 </tr>
@@ -387,19 +370,8 @@ const Home: React.FC = () => {
                                 {sortSessionsByStartTime(
                                   filteredData[studio][date]
                                 ).map((session, index) => (
-                                  <tr
-                                    key={index}
-                                    className={
-                                      isDarkMode
-                                        ? "hover:bg-gray-700"
-                                        : "hover:bg-gray-100"
-                                    }
-                                  >
-                                    <td
-                                      className={`py-2 px-4 border-b ${
-                                        isDarkMode ? "text-white" : "text-black"
-                                      }`}
-                                    >
+                                  <tr key={index}>
+                                    <td className={`py-2 px-4 border-b`}>
                                       <a
                                         href={session.url}
                                         target="_blank"
@@ -409,27 +381,15 @@ const Home: React.FC = () => {
                                         {session.session_name}
                                       </a>
                                     </td>
-                                    <td
-                                      className={`py-2 px-4 border-b ${
-                                        isDarkMode ? "text-white" : "text-black"
-                                      }`}
-                                    >
+                                    <td className={`py-2 px-4 border-b`}>
                                       {session.instructor}
                                     </td>
-                                    <td
-                                      className={`py-2 px-4 border-b ${
-                                        isDarkMode ? "text-white" : "text-black"
-                                      }`}
-                                    >
+                                    <td className={`py-2 px-4 border-b`}>
                                       {new Date(
                                         session.start_time
                                       ).toLocaleString()}
                                     </td>
-                                    <td
-                                      className={`py-2 px-4 border-b ${
-                                        isDarkMode ? "text-white" : "text-black"
-                                      }`}
-                                    >
+                                    <td className={`py-2 px-4 border-b`}>
                                       {new Date(
                                         session.end_time
                                       ).toLocaleString()}
