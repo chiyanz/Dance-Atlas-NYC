@@ -9,6 +9,8 @@ import {
   type DayOfWeek,
   type Studio,
 } from "@/types/preferenceSchema";
+import { NavButton } from "ui/Buttons";
+import Button from "@mui/material/Button";
 
 const daysOfWeek: Array<DayOfWeek> = [
   "Monday",
@@ -168,18 +170,8 @@ export default function Home() {
               </h1>
             </div>
             <div className="flex space-x-4">
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-              >
-                Search
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-              >
-                Logout
-              </button>
+              <NavButton name="Search" onClick={handleSearch} />
+              <NavButton name="Logout" onClick={handleLogout} />
             </div>
           </div>
         </header>
@@ -260,12 +252,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <button
-          onClick={handleSave}
-          className="bg-blue-600 text-white py-3 mt-4 rounded-md hover:bg-blue-700 transition duration-300 w-full"
-        >
-          Save Preferences
-        </button>
+        <Button onClick={handleSave}>Save Preferences</Button>
       </div>
     </div>
   );
