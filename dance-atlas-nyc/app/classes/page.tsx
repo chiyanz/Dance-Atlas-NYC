@@ -139,7 +139,7 @@ const Home: React.FC = () => {
   return (
     <div className={"min-h-screen w-full"}>
       <AppBar
-        position="static"
+        position="fixed"
         sx={{
           backgroundColor: "gray.100",
           boxShadow: 3,
@@ -194,7 +194,13 @@ const Home: React.FC = () => {
           label="Studio"
           options={["All"].concat(Object.keys(data))}
           state={selectedStudios}
-          setState={setSelectedStudios}
+          setState={(studios: Array<string>) => {
+            if (studios.includes("All")) {
+              setSelectedStudios(["All"]);
+            } else {
+              setSelectedStudios(studios);
+            }
+          }}
         />
         <DateSelect state={selectedStartDate} setState={setSelectedStartDate} />
         <DropDownSelect

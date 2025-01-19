@@ -5,11 +5,15 @@ export function filterClasses(
   data: OrganizedData
 ): OrganizedData {
   const filteredData: OrganizedData = {};
-
   // Iterate over each studio in the data
   Object.keys(data).forEach((studioName) => {
     // If studio filter is provided, skip studios that don't match
-    if (options.studio && !options.studio.includes(studioName)) {
+    if (
+      options.studio &&
+      options.studio.length > 0 &&
+      !options.studio.includes("All") &&
+      !options.studio.includes(studioName)
+    ) {
       return;
     }
 
@@ -23,8 +27,8 @@ export function filterClasses(
             const sessions = studioSessions[dateString];
 
             const filteredSessionsForDate = sessions.filter((session) => {
-              if (options.start_date) {
-                return session.start_time > options.start_date;
+              if (options.start_date && session.start_time) {
+                return new Date(session.start_time) > options.start_date;
               }
               return true;
             });

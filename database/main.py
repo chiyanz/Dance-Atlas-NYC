@@ -15,6 +15,7 @@ from typing import Dict, Literal
 import json
 import re
 from datetime import datetime
+import warnings
 
 studio_crawlers = {
     "Peri": PeriDanceCrawler,
@@ -95,8 +96,11 @@ class StudioCrawler:
                 print(f"error saving dev outputs: {e}")
 
     def crawlSessions(self):
-        for _, crawler in self.crawlers.items():
-            crawler.crawl()
+        for studio, crawler in self.crawlers.items():
+            try:
+                crawler.crawl()
+            except Exception as e:
+                warnings.warn(f'Error while crawling {studio}: {e}')
 
     def store(self):
         for studio_name, crawler in self.crawlers.items():

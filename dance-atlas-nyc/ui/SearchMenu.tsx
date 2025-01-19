@@ -58,7 +58,9 @@ export function DateSelect(props: {
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
           value={props.state}
-          onChange={(date) => props.setState(date)}
+          onChange={(date) => {
+            props.setState(date);
+          }}
         />
       </LocalizationProvider>
       <FormHelperText
