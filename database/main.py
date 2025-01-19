@@ -19,7 +19,7 @@ from datetime import datetime
 studio_crawlers = {
     "Peri": PeriDanceCrawler,
     "Modega": ModegaCrawler,
-    "BCD": BDCCrawler,
+    "BDC": BDCCrawler,
     "Brickhouse": BrickhouseCrawler,
     "ILoveDanceManhattan": ILDManhattanCrawler,
 }
@@ -80,10 +80,11 @@ class StudioCrawler:
         raise TypeError(f"Type {type(obj)} not serializable")
 
     def main(self):
+        print(f'crawling studios: {self.studios.keys()}')
         self.crawlSessions()
 
         if self.mode == "prod":
-            self.storeData()
+            self.store()
         else:
             devOutputFile = "dev_output.json"
             try:

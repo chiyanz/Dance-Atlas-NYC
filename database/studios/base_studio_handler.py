@@ -16,10 +16,18 @@ class BaseStudioHandler:
         self.url = url
         self.data: List = []
 
+    
+    def visit_url(self):
+        """
+        start crawling the web page located at the url
+        """
+        self.driver.get(self.url)
+
     def close_popups(
         self, button_xpath: str = ".//div[contains(@class, 'close')]", timeout=10
     ):
         self.driver.switch_to.parent_frame()
+        print(f'closing popup for: {self.url} with selector: {button_xpath}')
         try:
             close_button = WebDriverWait(self.driver, timeout).until(
                 EC.element_to_be_clickable((By.XPATH, button_xpath))

@@ -19,10 +19,10 @@ class PeriDanceCrawler(BaseStudioHandler):
         super().__init__(driver, url)
 
     def crawl(self):
-        self.driver.get(self.url)
+        self.visit_url()
 
         def close_popup_and_switch():
-            self.popup_recovery(
+            self.close_popups(
                 ".//div[contains(@class, 'wixui-lightbox__close-button')]"
             )
             iframe = self.wait_for_presence("//iframe")

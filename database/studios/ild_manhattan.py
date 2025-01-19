@@ -18,13 +18,16 @@ class ILDManhattanCrawler(BaseStudioHandler):
         super().__init__(driver, url)
 
     def crawl(self):
-        self.popup_recovery("//a[@class='sqs-popup-overlay-close']")
+        self.visit_url()
+
+        self.close_popups("//a[@class='sqs-popup-overlay-close']")
         try:
             dates = self.wait_for_all_visible(
                 "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]"
             )
         except:
-            self.popup_recovery("//a[@class='sqs-popup-overlay-close']")
+            print("ild dates not available, retrying")
+            self.close_popups("//a[@class='sqs-popup-overlay-close']")
             dates = self.wait_for_all_visible(
                 "//td[contains(@class, 'bw-calendar__day') and not(contains(@class, 'bw-calendar__day--past'))]"
             )

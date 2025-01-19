@@ -20,6 +20,8 @@ class ModegaCrawler(BaseStudioHandler):
         super().__init__(driver, url)
 
     def crawl(self):
+        self.visit_url()
+
         dates = self.wait_for_all_visible(
             "//*[contains(@class, 'd-flex') and contains(@class, 'flex-column') and contains(@class, 'week-range__day') and not(contains(@class, 'week-range--disabled'))]"
         )

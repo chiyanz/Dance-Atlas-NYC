@@ -18,6 +18,8 @@ class BDCCrawler(BaseStudioHandler):
         super().__init__(driver, url)
 
     def crawl(self):
+        self.visit_url()
+        
         dates = self.wait_for_all_visible("//div[contains(@class, 'bw-widget__day')]")
         edt_timezone = ZoneInfo("America/New_York")
 
