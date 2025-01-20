@@ -11,19 +11,14 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Dayjs } from "dayjs";
 
-interface OptionState {
-  label: string;
-  options: Array<any>;
-  state: string;
-  setState: (_: any) => void;
-}
-
 export function DropDownSelect(props: {
   label: string;
   options: Array<any>;
   state: any;
-  setState: (_: any) => void;
+  setState: (value: any) => void;
   multiple?: boolean;
+  render?: (value: any) => any;
+  default?: any;
 }) {
   return (
     <FormControl fullWidth>
@@ -31,12 +26,14 @@ export function DropDownSelect(props: {
       <Select
         labelId="multiple-select-label"
         multiple={props.multiple ?? true}
+        defaultValue={props.default}
         value={props.state}
         disabled={!Boolean(props.options.length)}
         label={`select ${props.label}`}
         onChange={(evt) => {
           props.setState(evt.target.value);
         }}
+        renderValue={props.render}
       >
         {props.options.map((option) => (
           <MenuItem value={option}>{option}</MenuItem>

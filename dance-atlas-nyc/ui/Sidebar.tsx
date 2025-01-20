@@ -26,6 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       anchor="left"
       variant={isOverlay ? "temporary" : "persistent"} // Handles overlay or sidebar
       sx={{
+        position: "fixed",
         marginTop: 3,
         zIndex: 1300,
         "& .MuiDrawer-paper": {
