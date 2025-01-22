@@ -1,20 +1,23 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { NavButton } from "ui/Buttons";
+import { Login, PersonAdd } from "@mui/icons-material";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 
 // This page is meant to be the root landing page that can demo what the database is capable of
 // Optionally include a video of how to utilize it and its features
 export default function Home() {
   const router = useRouter();
 
-  const handleSearchClick = () => {
+  const handleSearch = () => {
     router.push("/classes");
   };
 
-  const handleLoginClick = () => {
+  const handleLogin = () => {
     router.push("/login");
   };
 
-  const handleSignupClick = () => {
+  const handleSignup = () => {
     router.push("/signup");
   };
 
@@ -24,18 +27,12 @@ export default function Home() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Dance Atlas NYC</h1>
           <div className="space-x-4">
-            <button
-              onClick={handleSignupClick}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-            >
-              Sign Up
-            </button>
-            <button
-              onClick={handleLoginClick}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md text-sm"
-            >
-              Log In
-            </button>
+            <NavButton
+              name={"Signup"}
+              icon={<PersonAdd />}
+              onClick={handleSignup}
+            />
+            <NavButton name={"Login"} icon={<Login />} onClick={handleLogin} />
           </div>
         </div>
       </header>
@@ -44,12 +41,11 @@ export default function Home() {
         <h2 className="text-3xl font-semibold mb-6">
           Discover Dance Classes and Events in NYC
         </h2>
-        <button
-          onClick={handleSearchClick}
-          className="px-6 py-3 bg-blue-600 text-white text-lg rounded-md mb-12"
-        >
-          Search
-        </button>
+        <NavButton
+          name="Search"
+          icon={<ManageSearchIcon />}
+          onClick={handleSearch}
+        />
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 p-8">
           Please note: Dance Atlas NYC is an independent, non-profit resource
           for the dance community and is not affiliated with any dance studios.

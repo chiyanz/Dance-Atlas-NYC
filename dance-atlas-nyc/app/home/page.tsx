@@ -9,6 +9,27 @@ import {
   type DayOfWeek,
   type Studio,
 } from "@/types/preferenceSchema";
+import { NavButton } from "ui/Buttons";
+import Button from "@mui/material/Button";
+import SearchIcon from "@mui/icons-material/Search";
+import {
+  Box,
+  Card,
+  Container,
+  Slide,
+  SlideProps,
+  Snackbar,
+  SnackbarCloseReason,
+  Toolbar,
+  Tooltip,
+  CircularProgress,
+  Backdrop,
+} from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import { Logout } from "@mui/icons-material";
+import { ContentContainer, NavBar } from "ui/Layout";
+import { DropDownSelect } from "ui/SearchMenu";
+import BiMap from "bidirectional-map";
 
 const daysOfWeek: Array<DayOfWeek> = [
   "Monday",
@@ -20,13 +41,16 @@ const daysOfWeek: Array<DayOfWeek> = [
   "Sunday",
 ];
 
-const studios: Record<string, Studio> = {
-  Peridance: "Peri",
-  "Broadway Dance Center": "BDC",
-  Modega: "Modega",
-  "ILoveDance Manhattan": "ILoveDanceManhattan",
-  Brickhouse: "Brickhouse",
-};
+const studios = new BiMap<string>();
+studios.set("Peri", "Peridance");
+studios.set("BDC", "Broadway Dance Center");
+studios.set("Modega", "Modega");
+studios.set("ILoveDanceManhattan", "ILoveDance Manhattan");
+studios.set("Brickhouse", "Brickhouse");
+
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="down" />;
+}
 
 export default function Home() {
   const { user, loading } = useAuth();
@@ -40,22 +64,21 @@ export default function Home() {
     dayOfWeek: new Set<DayOfWeek>(),
     studio: new Set<Studio>(),
   });
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [preferencesLoading, setPreferencesLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
-      console.log("user not logged in!");
       router.push("/login");
     } else if (user) {
-      // Fetch user preferences from Firestore
+      setPreferencesLoading(true);
       fetch(`/api/preferences?uid=${user.uid}`)
         .then((res) => res.json())
         .then((data) => {
           if ("error" in data) {
-            console.log("error received: ", data);
           } else if (data.preferences) {
-            // Merge fetched preferences with existing preferences
             setPreferences((prevPreferences) => ({
-              ...prevPreferences, // Keep current state
+              ...prevPreferences,
               instructor:
                 data.preferences.instructor ?? prevPreferences.instructor,
               style: data.preferences.style ?? prevPreferences.style,
@@ -76,10 +99,12 @@ export default function Home() {
                 : prevPreferences.studio,
             }));
           }
+        })
+        .finally(() => {
+          setPreferencesLoading(false);
         });
     }
 
-    // Warn the user of unsaved changes when they try to exit the page
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isChanged) {
         e.preventDefault();
@@ -91,12 +116,10 @@ export default function Home() {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [user, loading, router, isChanged]);
+  }, [user, loading]);
 
   const handleSave = async () => {
-    console.log(preferences);
     if (user) {
-      // Convert Sets to Arrays before sending
       const preferencesToSend = {
         ...preferences,
         dayOfWeek: Array.from(preferences.dayOfWeek),
@@ -112,8 +135,8 @@ export default function Home() {
       });
 
       const data = await res.json();
-      alert(data.message || data.error);
-      setIsChanged(false); // Reset unsaved changes warning after saving
+      setPopupOpen(true);
+      setIsChanged(false);
     }
   };
 
@@ -128,21 +151,13 @@ export default function Home() {
 
   const handlePreferenceChange = (
     name: keyof Preferences,
-    value: DayOfWeek | Studio | string
+    value: Array<DayOfWeek> | Array<Studio> | string
   ) => {
     setPreferences((prevPreferences) => {
       let updatedVal;
 
       if (name === "dayOfWeek" || name === "studio") {
-        const currentSet = new Set(prevPreferences[name] as Set<string>);
-
-        if (currentSet.has(value as string)) {
-          currentSet.delete(value as string);
-        } else {
-          currentSet.add(value as string);
-        }
-
-        updatedVal = currentSet;
+        updatedVal = new Set(value);
       } else {
         updatedVal = value;
       }
@@ -153,120 +168,130 @@ export default function Home() {
     setIsChanged(true);
   };
 
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setPopupOpen(false);
+  };
+
   if (loading) {
     return <div className="text-center text-white">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <div className="mb-4 flex items-center justify-between">
-        <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
-          <div className="mb-2 flex flex-wrap items-center justify-between">
-            <div className="flex space-x-4">
-              <h1 className="text-2xl font-semibold text-black dark:text-white">
-                My Preferences
-              </h1>
-            </div>
-            <div className="flex space-x-4">
-              <button
-                onClick={handleSearch}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-              >
-                Search
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </header>
-      </div>
-      <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md w-full max-w-xl mx-auto">
-        <div className="space-y-4">
-          <input
-            type="text"
-            name="instructor"
-            value={preferences.instructor}
-            onChange={(e) =>
-              handlePreferenceChange("instructor", e.target.value)
-            }
-            placeholder="Instructor"
-            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
-          />
-          <input
-            type="text"
-            name="style"
-            value={preferences.style}
-            onChange={(e) => handlePreferenceChange("style", e.target.value)}
-            placeholder="Style"
-            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
-          />
-          <input
-            type="text"
-            name="level"
-            value={preferences.level}
-            onChange={(e) => handlePreferenceChange("level", e.target.value)}
-            placeholder="Level"
-            className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
-          />
-
-          {/* Custom Multi-select for Day of the Week */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Preferred Days of the Week:
-            </label>
-            <div className="p-3 border border-gray-300 rounded-md w-full flex flex-col space-y-2">
-              {daysOfWeek.map((day) => (
-                <label key={day} className="inline-flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={Array.from(preferences.dayOfWeek).includes(day)}
-                    onChange={() => handlePreferenceChange("dayOfWeek", day)}
-                    className="form-checkbox h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-black dark:text-white">{day}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Multi-select for Studio */}
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              Preferred Studios:
-            </label>
-            <div className="p-3 border border-gray-300 rounded-md w-full flex flex-col space-y-2">
-              {Object.keys(studios).map((studio) => (
-                <label
-                  key={studio}
-                  className="inline-flex items-center space-x-2"
-                >
-                  <input
-                    type="checkbox"
-                    checked={Array.from(preferences.studio).includes(
-                      studios[studio]
-                    )}
-                    onChange={() =>
-                      handlePreferenceChange("studio", studios[studio])
-                    }
-                    className="form-checkbox h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-black dark:text-white">{studio}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={handleSave}
-          className="bg-blue-600 text-white py-3 mt-4 rounded-md hover:bg-blue-700 transition duration-300 w-full"
+    <div className="min-h-screen">
+      <NavBar>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            padding: 2,
+          }}
         >
-          Save Preferences
-        </button>
-      </div>
+          <h1 className="text-2xl font-semibold text-black dark:text-white">
+            My Preferences
+          </h1>
+          <Box>
+            <NavButton
+              name="Search"
+              icon={<SearchIcon />}
+              onClick={handleSearch}
+            />
+            <NavButton name="Logout" icon={<Logout />} onClick={handleLogout} />
+          </Box>
+        </Toolbar>
+      </NavBar>
+      <ContentContainer>
+        <Card sx={{ padding: 2, margin: 2 }}>
+          <Container
+            sx={{ display: "flex", flexDirection: "column", rowGap: 3 }}
+          >
+            <input
+              type="text"
+              name="instructor"
+              value={preferences.instructor}
+              onChange={(e) =>
+                handlePreferenceChange("instructor", e.target.value)
+              }
+              placeholder="Instructor"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+            />
+            <input
+              type="text"
+              name="style"
+              value={preferences.style}
+              onChange={(e) => handlePreferenceChange("style", e.target.value)}
+              placeholder="Style"
+              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
+            />
+
+            <DropDownSelect
+              label="Days of the Week"
+              options={daysOfWeek}
+              state={Array.from(preferences.dayOfWeek)}
+              setState={(day) => {
+                handlePreferenceChange("dayOfWeek", day);
+              }}
+            />
+
+            <DropDownSelect
+              label="Studios"
+              options={Array.from(studios.values())}
+              state={Array.from(preferences.studio).map((dbName) =>
+                studios.get(dbName)
+              )}
+              setState={(selectedStudios) => {
+                handlePreferenceChange(
+                  "studio",
+                  selectedStudios.map((displayName: string) =>
+                    studios.getKey(displayName)
+                  )
+                );
+              }}
+            />
+          </Container>
+          <Tooltip
+            title={
+              isChanged
+                ? "Save updated preferences"
+                : "No changes have been made"
+            }
+          >
+            <span>
+              <Button
+                sx={{ margin: 3 }}
+                disabled={!isChanged}
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+              >
+                Save Preferences
+              </Button>
+            </span>
+          </Tooltip>
+        </Card>
+        <Snackbar
+          open={popupOpen}
+          onClose={handleClose}
+          message="Preferences saved successfully!"
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          TransitionComponent={SlideTransition}
+          autoHideDuration={2000}
+        />
+      </ContentContainer>
+      <Backdrop
+        open={preferencesLoading}
+        sx={{
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 }

@@ -1,0 +1,9 @@
+.media-hidden-600 {
+  display: block; 
+}
+
+@media (max-width: 600px) {
+  .media-hidden-600 {
+    display: none;
+  }
+}
