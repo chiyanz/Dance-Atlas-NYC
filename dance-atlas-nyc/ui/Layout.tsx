@@ -6,7 +6,6 @@ export function NavBar(props: { children: ReactNode }) {
     <AppBar
       position="sticky"
       sx={{
-        maxHeight: "5vh",
         backgroundColor: "gray.100",
         boxShadow: 3,
         width: "100%",

@@ -12,7 +12,20 @@ import {
 import { NavButton } from "ui/Buttons";
 import Button from "@mui/material/Button";
 import SearchIcon from "@mui/icons-material/Search";
-import { AppBar, Box, Card, Toolbar } from "@mui/material";
+import {
+  Box,
+  Card,
+  Container,
+  Slide,
+  SlideProps,
+  Snackbar,
+  SnackbarCloseReason,
+  Toolbar,
+  Tooltip,
+  CircularProgress,
+  Backdrop,
+} from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
 import { Logout } from "@mui/icons-material";
 import { ContentContainer, NavBar } from "ui/Layout";
 import { DropDownSelect } from "ui/SearchMenu";
@@ -35,6 +48,10 @@ studios.set("Modega", "Modega");
 studios.set("ILoveDanceManhattan", "ILoveDance Manhattan");
 studios.set("Brickhouse", "Brickhouse");
 
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="down" />;
+}
+
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -47,22 +64,21 @@ export default function Home() {
     dayOfWeek: new Set<DayOfWeek>(),
     studio: new Set<Studio>(),
   });
+  const [popupOpen, setPopupOpen] = useState(false);
+  const [preferencesLoading, setPreferencesLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
-      console.log("user not logged in!");
       router.push("/login");
     } else if (user) {
-      // Fetch user preferences from Firestore
+      setPreferencesLoading(true);
       fetch(`/api/preferences?uid=${user.uid}`)
         .then((res) => res.json())
         .then((data) => {
           if ("error" in data) {
-            console.log("error received: ", data);
           } else if (data.preferences) {
-            // Merge fetched preferences with existing preferences
             setPreferences((prevPreferences) => ({
-              ...prevPreferences, // Keep current state
+              ...prevPreferences,
               instructor:
                 data.preferences.instructor ?? prevPreferences.instructor,
               style: data.preferences.style ?? prevPreferences.style,
@@ -83,10 +99,12 @@ export default function Home() {
                 : prevPreferences.studio,
             }));
           }
+        })
+        .finally(() => {
+          setPreferencesLoading(false);
         });
     }
 
-    // Warn the user of unsaved changes when they try to exit the page
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (isChanged) {
         e.preventDefault();
@@ -98,12 +116,10 @@ export default function Home() {
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, [user, loading, router, isChanged]);
+  }, [user, loading]);
 
   const handleSave = async () => {
-    console.log(preferences);
     if (user) {
-      // Convert Sets to Arrays before sending
       const preferencesToSend = {
         ...preferences,
         dayOfWeek: Array.from(preferences.dayOfWeek),
@@ -119,8 +135,8 @@ export default function Home() {
       });
 
       const data = await res.json();
-      alert(data.message || data.error);
-      setIsChanged(false); // Reset unsaved changes warning after saving
+      setPopupOpen(true);
+      setIsChanged(false);
     }
   };
 
@@ -152,6 +168,17 @@ export default function Home() {
     setIsChanged(true);
   };
 
+  const handleClose = (
+    event: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setPopupOpen(false);
+  };
+
   if (loading) {
     return <div className="text-center text-white">Loading...</div>;
   }
@@ -180,8 +207,10 @@ export default function Home() {
         </Toolbar>
       </NavBar>
       <ContentContainer>
-        <Card>
-          <div className="space-y-4">
+        <Card sx={{ padding: 2, margin: 2 }}>
+          <Container
+            sx={{ display: "flex", flexDirection: "column", rowGap: 3 }}
+          >
             <input
               type="text"
               name="instructor"
@@ -200,14 +229,6 @@ export default function Home() {
               placeholder="Style"
               className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
             />
-            <input
-              type="text"
-              name="level"
-              value={preferences.level}
-              onChange={(e) => handlePreferenceChange("level", e.target.value)}
-              placeholder="Level"
-              className="p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full text-black"
-            />
 
             <DropDownSelect
               label="Days of the Week"
@@ -221,7 +242,6 @@ export default function Home() {
             <DropDownSelect
               label="Studios"
               options={Array.from(studios.values())}
-              // the studios record maps from studio name in the DB to a more readable string
               state={Array.from(preferences.studio).map((dbName) =>
                 studios.get(dbName)
               )}
@@ -233,12 +253,45 @@ export default function Home() {
                   )
                 );
               }}
-              // render={(dbName) => studios.get(dbName)}
             />
-          </div>
-          <Button onClick={handleSave}>Save Preferences</Button>
+          </Container>
+          <Tooltip
+            title={
+              isChanged
+                ? "Save updated preferences"
+                : "No changes have been made"
+            }
+          >
+            <span>
+              <Button
+                sx={{ margin: 3 }}
+                disabled={!isChanged}
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+              >
+                Save Preferences
+              </Button>
+            </span>
+          </Tooltip>
         </Card>
+        <Snackbar
+          open={popupOpen}
+          onClose={handleClose}
+          message="Preferences saved successfully!"
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          TransitionComponent={SlideTransition}
+          autoHideDuration={2000}
+        />
       </ContentContainer>
+      <Backdrop
+        open={preferencesLoading}
+        sx={{
+          color: "#fff",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </div>
   );
 }
