@@ -1,12 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  SessionData,
-  OrganizedData,
-  sessionDataKeys,
-} from "../../types/dataSchema";
-import { NavButton } from "ui/Buttons";
+import { Dayjs } from "dayjs";
 import HomeIcon from "@mui/icons-material/Home";
 import { useAuth } from "context/AuthContext";
 import { Login, Logout } from "@mui/icons-material";
@@ -15,7 +10,7 @@ import {
   Box,
   Card,
   CardContent,
-  Grid,
+  Grid2,
   Paper,
   Chip,
   Typography,
@@ -31,23 +26,48 @@ import {
   Link,
 } from "@mui/material";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import * as motion from "motion/react-client";
+
+import { NavButton } from "ui/Buttons";
 import { DateSelect, DropDownSelect } from "../../ui/SearchMenu";
-import { Dayjs } from "dayjs";
 import { filterClasses } from "./search";
 import { ContentContainer, NavBar } from "ui/Layout";
+import {
+  SessionData,
+  OrganizedData,
+  sessionDataKeys,
+} from "../../types/dataSchema";
 
 interface ClassSessionWithStudio extends SessionData {
   studio: string;
 }
 
 const ClassesPage: React.FC = () => {
+  // API State
   const { user, loading: authLoading } = useAuth();
   const [data, setData] = useState<OrganizedData>({});
   const [filteredClasses, setFilteredClasses] = useState<OrganizedData>({});
   const [loading, setLoading] = useState<boolean>(true);
+  const [loadingDots, setLoadingDots] = useState(1);
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      interval = setInterval(() => {
+        setLoadingDots((prev) => (prev + 1) % 5);
+      }, 250);
+    }
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [loading]);
+
+  // Filter selectors
   const [selectedStudios, setSelectedStudios] = useState<Array<string>>([
     "All",
   ]);
+  const [currentStudio, setCurrentStudio] = useState<string>("All");
   const [selectedStartDate, setSelectedStartDate] = useState<Dayjs | null>(
     null
   );
@@ -262,13 +282,32 @@ const ClassesPage: React.FC = () => {
         <Toolbar
           sx={{ display: "flex", justifyContent: "space-between", padding: 2 }}
         >
-          <Box>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton
               onClick={() => setFilterExpanded(!filterExpanded)}
               sx={{ borderRadius: "4px", mr: 1 }}
             >
               <FilterListIcon />
             </IconButton>
+            {selectedStudios.length > 1 && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mr: 2 }}>
+                  {selectedStudios.map((studio) => (
+                    <Chip
+                      key={studio}
+                      label={studio}
+                      onClick={() => setCurrentStudio(studio)}
+                      color={currentStudio === studio ? "primary" : "default"}
+                      sx={{ mr: 1 }}
+                    />
+                  ))}
+                </Box>
+              </motion.div>
+            )}
             {selectedStudios.length > 0 && selectedStudios[0] !== "All" && (
               <Chip
                 label={`Studios: ${selectedStudios.length}`}
@@ -310,29 +349,45 @@ const ClassesPage: React.FC = () => {
       <ContentContainer>
         <Collapse in={filterExpanded}>
           <Paper sx={{ p: 2, mb: 2 }}>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={4}>
+            <Grid2 container spacing={2} alignItems="center">
+              <Grid2>
                 <DropDownSelect
                   default={["All"]}
                   label="Studio"
                   options={["All"].concat(Object.keys(data))}
                   state={selectedStudios}
                   setState={(studios: Array<string>) => {
+                    // if we previously had All, we should remove it
+                    if (selectedStudios.every((s) => s === "All")) {
+                      const filteredStudios = studios.filter(
+                        (s) => s !== "All"
+                      );
+                      setSelectedStudios(filteredStudios);
+                      setCurrentStudio(filteredStudios[0]);
+                      return;
+                    }
+
+                    // if we choose All, might as well only keep All
                     if (studios.includes("All")) {
                       setSelectedStudios(["All"]);
-                    } else {
-                      setSelectedStudios(studios);
+                      setCurrentStudio("All");
+                      return;
+                    }
+
+                    setSelectedStudios(studios);
+                    if (!studios.includes(currentStudio)) {
+                      setCurrentStudio(studios[0]);
                     }
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              </Grid2>
+              <Grid2>
                 <DateSelect
                   state={selectedStartDate}
                   setState={setSelectedStartDate}
                 />
-              </Grid>
-              <Grid item xs={12} sm={4}>
+              </Grid2>
+              <Grid2>
                 <DropDownSelect
                   label="Search By Field"
                   options={sessionDataKeys}
@@ -340,91 +395,112 @@ const ClassesPage: React.FC = () => {
                   setState={setSelectedField}
                   multiple={false}
                 />
-              </Grid>
-            </Grid>
+              </Grid2>
+            </Grid2>
           </Paper>
         </Collapse>
 
         {loading ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
-            <Typography>Loading...</Typography>
+            <Typography>{`Loading${".".repeat(loadingDots)}`}</Typography>
           </Box>
         ) : !hasClasses ? (
           <Box sx={{ p: 4, textAlign: "center" }}>
             <Typography variant="h6">No classes found</Typography>
           </Box>
-        ) : selectedStudios[0] === "All" ? (
-          <Stack spacing={3} sx={{ p: 2 }}>
-            {Object.entries(getAllClassesByDate()).map(([date, sessions]) => (
-              <Card key={date} elevation={2}>
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-                      pb: 1,
-                      mb: 2,
-                    }}
-                  >
-                    {new Date(date).toLocaleDateString([], {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </Typography>
-                  {renderClassTable(sessions, true)}
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
         ) : (
-          <Stack spacing={3} sx={{ p: 2 }}>
-            {Object.keys(filteredClasses).map((studio) => (
-              <Card key={studio} elevation={2}>
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    gutterBottom
-                    sx={{
-                      borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-                      pb: 1,
-                      mb: 2,
-                    }}
-                  >
-                    {studio}
-                  </Typography>
-                  <Stack spacing={3}>
-                    {getSortedDates(Object.keys(filteredClasses[studio])).map(
-                      (date) =>
-                        filteredClasses[studio][date] &&
-                        filteredClasses[studio][date].length > 0 && (
-                          <div key={date}>
-                            <Typography
-                              variant="subtitle1"
-                              sx={{
-                                mb: 2,
-                                color: "text.secondary",
-                                fontWeight: 500,
-                              }}
-                            >
-                              {new Date(date).toLocaleDateString([], {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </Typography>
-                            {renderClassTable(filteredClasses[studio][date])}
-                          </div>
-                        )
-                    )}
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
+          <motion.div
+            key={currentStudio}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {selectedStudios[0] === "All" || selectedStudios.length === 1 ? (
+              <Stack spacing={3} sx={{ p: 2 }}>
+                {Object.entries(getAllClassesByDate()).map(
+                  ([date, sessions]) => (
+                    <Card key={date} elevation={2}>
+                      <CardContent>
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{
+                            borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                            pb: 1,
+                            mb: 2,
+                          }}
+                        >
+                          {new Date(date).toLocaleDateString([], {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })}
+                        </Typography>
+                        {renderClassTable(sessions, true)}
+                      </CardContent>
+                    </Card>
+                  )
+                )}
+              </Stack>
+            ) : (
+              <Stack spacing={3} sx={{ p: 2 }}>
+                {Object.keys(filteredClasses)
+                  .filter(
+                    (studio) =>
+                      currentStudio === "All" || studio === currentStudio
+                  )
+                  .map((studio) => (
+                    <Card key={studio} elevation={2}>
+                      <CardContent>
+                        <Typography
+                          variant="h6"
+                          gutterBottom
+                          sx={{
+                            borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+                            pb: 1,
+                            mb: 2,
+                          }}
+                        >
+                          {studio}
+                        </Typography>
+                        <Stack spacing={3}>
+                          {getSortedDates(
+                            Object.keys(filteredClasses[studio])
+                          ).map(
+                            (date) =>
+                              filteredClasses[studio][date] &&
+                              filteredClasses[studio][date].length > 0 && (
+                                <div key={date}>
+                                  <Typography
+                                    variant="subtitle1"
+                                    sx={{
+                                      mb: 2,
+                                      color: "text.secondary",
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {new Date(date).toLocaleDateString([], {
+                                      weekday: "long",
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    })}
+                                  </Typography>
+                                  {renderClassTable(
+                                    filteredClasses[studio][date]
+                                  )}
+                                </div>
+                              )
+                          )}
+                        </Stack>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </Stack>
+            )}
+          </motion.div>
         )}
       </ContentContainer>
     </div>

@@ -100,7 +100,7 @@ class StudioCrawler:
             try:
                 crawler.crawl()
             except Exception as e:
-                warnings.warn(f'Error while crawling {studio}: {e}')
+                warnings.warn(f'Error while crawling {studio}: {str(e)}')
 
     def store(self):
         for studio_name, crawler in self.crawlers.items():
