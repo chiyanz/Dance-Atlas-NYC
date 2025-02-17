@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { NavButton } from "ui/Buttons";
 import { Login, PersonAdd } from "@mui/icons-material";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { motion } from "motion/react";
 
 // This page is meant to be the root landing page that can demo what the database is capable of
 // Optionally include a video of how to utilize it and its features
@@ -23,6 +24,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white dark:bg-black text-black dark:text-white">
+      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} />
       <header className="w-full p-4 bg-gray-100 dark:bg-gray-900 shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Dance Atlas NYC</h1>
